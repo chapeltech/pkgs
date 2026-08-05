@@ -1,0 +1,5 @@
+Types: deb
+URIs: https://repo.chapeltech.uk/debian
+Suites: trixie
+Components: main
+Signed-By: /etc/apt/keyrings/chapeltech-archive-keyring.gpg

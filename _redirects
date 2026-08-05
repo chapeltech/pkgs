@@ -1,0 +1,2 @@
+/debian/pool/github/* https://github.com/:splat 302
+/rpm/el9/x86_64/Packages/github/* https://github.com/:splat 302
