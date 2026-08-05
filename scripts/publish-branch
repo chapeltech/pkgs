@@ -18,7 +18,7 @@ else
 	(
 		cd "$worktree"
 		git switch --orphan published
-		git rm -rf .
+		git rm -rf --ignore-unmatch .
 	)
 fi
 
