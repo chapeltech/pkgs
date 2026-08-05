@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 30
     environment: release-signing
     env:
-      GNUPGHOME: ${{ runner.temp }}/archive-signing
+      GNUPGHOME: /tmp/archive-signing
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
         with:
