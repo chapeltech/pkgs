@@ -1,0 +1,208 @@
+#!/bin/sh
+
+set -eu
+
+if [ "$#" -gt 2 ]; then
+	echo "usage: $0 [artifacts] [output]" >&2
+	exit 2
+fi
+
+artifacts=${1:-artifacts}
+output=${2:-public}
+top=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+manifest=$top/packages.json
+organization=$(jq -er .organization "$manifest")
+fingerprint=${ARCHIVE_SIGNING_SUBKEY_FINGERPRINT:?ARCHIVE_SIGNING_SUBKEY_FINGERPRINT is required}
+passphrase=${ARCHIVE_SIGNING_PASSPHRASE:?ARCHIVE_SIGNING_PASSPHRASE is required}
+
+"$top/scripts/check-signing-key"
+
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT HUP INT TERM
+printf '%s' "$passphrase" >"$work/passphrase"
+chmod 600 "$work/passphrase"
+mkdir -p "$work/seen"
+
+rm -rf "$output"
+mkdir -p "$output/keys" \
+	"$output/debian/dists/trixie/main/binary-amd64" \
+	"$output/debian/dists/trixie/main/binary-arm64" \
+	"$output/rpm/el9/x86_64/Packages"
+
+gpg --batch --export "$fingerprint" \
+	>"$output/keys/chapeltech-archive-keyring.gpg"
+gpg --batch --armor --export "$fingerprint" \
+	>"$output/keys/chapeltech-archive-keyring.asc"
+
+rpmdb=$work/rpmdb
+rpm --dbpath "$rpmdb" --initdb
+rpm --dbpath "$rpmdb" --import \
+	"$output/keys/chapeltech-archive-keyring.asc"
+
+while IFS='	' read -r repository tag name url extra; do
+	if [ -z "$repository" ] || [ -z "$tag" ] || [ -z "$name" ] || \
+	    [ -z "$url" ] || [ -n "$extra" ]; then
+		echo "invalid release manifest entry" >&2
+		exit 1
+	fi
+	case "$repository" in
+	''|.|..|*/*)
+		echo "unsafe repository in release manifest: $repository" >&2
+		exit 1
+		;;
+	esac
+	case "$tag" in
+	''|.|..|*/*)
+		echo "unsafe tag in release manifest: $tag" >&2
+		exit 1
+		;;
+	esac
+	case "$name" in
+	''|.|..|*/*)
+		echo "unsafe release manifest entry: $repository $tag $name" >&2
+		exit 1
+		;;
+	esac
+	if ! jq -e --arg repository "$repository" \
+	    '.repositories | index($repository) != null' "$manifest" >/dev/null; then
+		echo "release manifest contains unconfigured repository: $repository" >&2
+		exit 1
+	fi
+	expected=https://github.com/$organization/$repository/releases/download/$tag/$name
+	if [ "$url" != "$expected" ]; then
+		echo "release manifest contains unexpected asset URL: $url" >&2
+		exit 1
+	fi
+	source=$artifacts/$repository/$tag/$name
+	test -f "$source"
+	case "$name" in
+	*.deb)
+		arch=$(dpkg-deb -f "$source" Architecture)
+		case "$arch" in
+		amd64|arm64)
+			;;
+		*)
+			echo "ignoring unsupported Debian architecture: $name ($arch)" >&2
+			continue
+			;;
+		esac
+		touch "$work/seen/$repository-deb-$arch"
+		destination=$output/debian/pool/github/$organization/$repository/releases/download/$tag/$name
+		;;
+	*.rpm)
+		arch=$(rpm -qp --qf '%{ARCH}' "$source")
+		case "$arch" in
+		x86_64|noarch)
+			;;
+		*)
+			echo "ignoring unsupported RPM architecture: $name ($arch)" >&2
+			continue
+			;;
+		esac
+		signature=$(rpm -qp --qf '%{RSAHEADER:pgpsig}%{DSAHEADER:pgpsig}%{SIGPGP:pgpsig}%{SIGGPG:pgpsig}' "$source")
+		if [ "$signature" = '(none)(none)(none)(none)' ]; then
+			echo "unsigned RPM is not publishable: $name" >&2
+			exit 1
+		fi
+		rpmkeys --dbpath "$rpmdb" --checksig "$source" >/dev/null
+		touch "$work/seen/$repository-rpm-$arch"
+		destination=$output/rpm/el9/x86_64/Packages/github/$organization/$repository/releases/download/$tag/$name
+		;;
+	*)
+		continue
+		;;
+	esac
+	mkdir -p "$(dirname -- "$destination")"
+	ln -s "$(realpath -- "$source")" "$destination"
+done <"$artifacts/releases.tsv"
+
+for repository in $(jq -r '.repositories[]' "$manifest"); do
+	for arch in amd64 arm64; do
+		test -f "$work/seen/$repository-deb-$arch" || {
+			echo "missing $arch Debian packages for $repository" >&2
+			exit 1
+		}
+	done
+	test -f "$work/seen/$repository-rpm-x86_64" || {
+		echo "missing signed EL9 packages for $repository" >&2
+		exit 1
+	}
+done
+
+(
+	cd "$output/debian"
+	for arch in amd64 arm64; do
+		dpkg-scanpackages --arch "$arch" --multiversion pool /dev/null \
+		    >"dists/trixie/main/binary-$arch/Packages"
+		gzip -9n -c "dists/trixie/main/binary-$arch/Packages" \
+		    >"dists/trixie/main/binary-$arch/Packages.gz"
+	done
+	apt-ftparchive \
+	    -o APT::FTPArchive::Release::Origin=ChapelTech \
+	    -o APT::FTPArchive::Release::Label=ChapelTech \
+	    -o APT::FTPArchive::Release::Suite=trixie \
+	    -o APT::FTPArchive::Release::Codename=trixie \
+	    -o 'APT::FTPArchive::Release::Architectures=amd64 arm64' \
+	    -o APT::FTPArchive::Release::Components=main \
+	    -o 'APT::FTPArchive::Release::Description=ChapelTech packages for Debian 13' \
+	    release dists/trixie >dists/trixie/Release
+	gpg --batch --yes --pinentry-mode loopback \
+	    --passphrase-file "$work/passphrase" --local-user "$fingerprint!" \
+	    --armor --detach-sign \
+	    --output dists/trixie/Release.gpg dists/trixie/Release
+	gpg --batch --yes --pinentry-mode loopback \
+	    --passphrase-file "$work/passphrase" --local-user "$fingerprint!" \
+	    --clearsign \
+	    --output dists/trixie/InRelease dists/trixie/Release
+)
+
+createrepo_c --quiet --general-compress-type=gz "$output/rpm/el9/x86_64"
+gpg --batch --yes --pinentry-mode loopback \
+	--passphrase-file "$work/passphrase" --local-user "$fingerprint!" \
+	--armor --detach-sign \
+	--output "$output/rpm/el9/x86_64/repodata/repomd.xml.asc" \
+	"$output/rpm/el9/x86_64/repodata/repomd.xml"
+
+rm -rf "$output/debian/pool" "$output/rpm/el9/x86_64/Packages"
+
+cat >"$output/_redirects" <<'EOF'
+/debian/pool/github/* https://github.com/:splat 302
+/rpm/el9/x86_64/Packages/github/* https://github.com/:splat 302
+EOF
+
+mkdir -p "$output/config"
+cat >"$output/config/chapeltech.sources" <<'EOF'
+Types: deb
+URIs: https://repo.chapeltech.uk/debian
+Suites: trixie
+Components: main
+Signed-By: /etc/apt/keyrings/chapeltech-archive-keyring.gpg
+EOF
+
+cat >"$output/config/chapeltech.repo" <<'EOF'
+[chapeltech]
+name=ChapelTech packages for EL9
+baseurl=https://repo.chapeltech.uk/rpm/el9/$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://repo.chapeltech.uk/keys/chapeltech-archive-keyring.asc
+EOF
+
+cat >"$output/index.html" <<'EOF'
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>ChapelTech packages</title></head>
+<body>
+<h1>ChapelTech packages</h1>
+<p>Debian 13 packages are available for amd64 and arm64.</p>
+<p>EL9 packages are available for x86_64.</p>
+<ul>
+<li><a href="/config/chapeltech.sources">APT source configuration</a></li>
+<li><a href="/config/chapeltech.repo">DNF repository configuration</a></li>
+<li><a href="/keys/chapeltech-archive-keyring.gpg">APT archive key</a></li>
+<li><a href="/keys/chapeltech-archive-keyring.asc">ASCII-armored archive key</a></li>
+</ul>
+</body>
+</html>
+EOF

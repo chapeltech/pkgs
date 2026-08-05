@@ -1,0 +1,61 @@
+#!/bin/sh
+
+set -eu
+
+top=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+
+find "$top/scripts" "$top/tests" -type f -perm -0100 -print |
+while IFS= read -r script; do
+	sh -n "$script"
+done
+
+if command -v shellcheck >/dev/null 2>&1; then
+	shellcheck "$top"/scripts/* "$top"/tests/build-repositories \
+		"$top"/tests/fetch-releases "$top"/tests/run-build-test \
+		"$top"/tests/static
+fi
+
+if command -v yamllint >/dev/null 2>&1; then
+	yamllint -d '{extends: default, rules: {line-length: disable, truthy: disable}}' \
+		"$top/.github/workflows/publish.yml"
+else
+	python3 - "$top/.github/workflows/publish.yml" <<'PY'
+import sys
+import yaml
+
+with open(sys.argv[1], encoding="utf-8") as source:
+    yaml.load(source, Loader=yaml.BaseLoader)
+PY
+fi
+
+jq -e '
+    .organization == "ChapelTech" and
+    .repositories == ["knc"]
+' "$top/packages.json" >/dev/null
+
+git -C "$top" check-ignore -q artifacts/example
+git -C "$top" check-ignore -q public/example
+git -C "$top" check-ignore -q public-test/example
+
+marker='BEGIN PGP PRIVATE KEY'' BLOCK'
+matches=$(find "$top" \
+	\( -path "$top/.git" -o -path "$top/artifacts" -o \
+	   -path "$top/public" -o -path "$top/public-test" \) -prune -o \
+	-type f -exec grep -Il "$marker" {} +) || true
+if [ -n "$matches" ]; then
+	echo "private key armor found in source tree:" >&2
+	printf '%s\n' "$matches" >&2
+	exit 1
+fi
+
+find "$top" \
+	\( -path "$top/.git" -o -path "$top/artifacts" -o \
+	   -path "$top/public" -o -path "$top/public-test" \) -prune -o \
+	-type f \( -name '*.asc' -o -name '*.gpg' -o -name '*.pgp' \) -print |
+while IFS= read -r key_file; do
+	if gpg --batch --list-packets "$key_file" 2>/dev/null |
+	    grep -Eq '^:secret (key|sub key) packet:'; then
+		echo "private key packet found in source tree: $key_file" >&2
+		exit 1
+	fi
+done

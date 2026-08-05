@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -eu
+
+top=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+image=chapeltech-pkgs-test
+engine=${CONTAINER_ENGINE:-}
+
+if [ -z "$engine" ]; then
+	if command -v docker >/dev/null 2>&1; then
+		engine=docker
+	elif command -v podman >/dev/null 2>&1; then
+		engine=podman
+	else
+		echo "docker or podman is required" >&2
+		exit 1
+	fi
+fi
+
+"$engine" build -t "$image" "$top/tests"
+"$engine" run --rm --security-opt label=disable \
+	--user "$(id -u):$(id -g)" \
+	-e HOME=/tmp -v "$top:/src" -w /src "$image" \
+	sh -c 'tests/static && tests/fetch-releases && tests/run-build-test'

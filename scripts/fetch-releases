@@ -1,0 +1,61 @@
+#!/bin/sh
+
+set -eu
+
+if [ "$#" -gt 1 ]; then
+	echo "usage: $0 [destination]" >&2
+	exit 2
+fi
+
+dest=${1:-artifacts}
+top=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+manifest=$top/packages.json
+organization=$(jq -er .organization "$manifest")
+
+rm -rf "$dest"
+mkdir -p "$dest"
+: >"$dest/releases.tsv"
+
+jq -r '.repositories[]' "$manifest" | while IFS= read -r repository; do
+	release=$(mktemp)
+	trap 'rm -f "$release"' EXIT HUP INT TERM
+	gh api "repos/$organization/$repository/releases/latest" >"$release"
+	tag=$(jq -er '.tag_name' "$release")
+	case "$tag" in
+	''|.|..|*/*)
+		echo "unsafe release tag for $repository: $tag" >&2
+		exit 1
+		;;
+	esac
+	if ! jq -e '.draft == false and .prerelease == false' \
+	    "$release" >/dev/null; then
+		echo "latest $repository release ($tag) is not a stable release" >&2
+		exit 1
+	fi
+	mkdir -p "$dest/$repository/$tag"
+
+	jq -r '.assets[] | select(.name | test("\\.(deb|rpm)$")) |
+	    [.name, .browser_download_url] | @tsv' "$release" |
+	while IFS='	' read -r name url; do
+		case "$name" in
+		*.src.rpm)
+			continue
+			;;
+		''|.|..|*/*)
+			echo "unsafe release asset name for $repository: $name" >&2
+			exit 1
+			;;
+		esac
+		expected=https://github.com/$organization/$repository/releases/download/$tag/$name
+		if [ "$url" != "$expected" ]; then
+			echo "unexpected release asset URL for $name: $url" >&2
+			exit 1
+		fi
+		curl --fail --location --retry 3 --silent --show-error \
+		    --output "$dest/$repository/$tag/$name" "$url"
+		printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$name" "$url" \
+		    >>"$dest/releases.tsv"
+	done
+	rm -f "$release"
+	trap - EXIT HUP INT TERM
+done

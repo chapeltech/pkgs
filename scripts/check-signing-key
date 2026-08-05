@@ -1,0 +1,53 @@
+#!/bin/sh
+
+set -eu
+
+fingerprint=${ARCHIVE_SIGNING_SUBKEY_FINGERPRINT:?ARCHIVE_SIGNING_SUBKEY_FINGERPRINT is required}
+passphrase=${ARCHIVE_SIGNING_PASSPHRASE:?ARCHIVE_SIGNING_PASSPHRASE is required}
+
+if [ "${#fingerprint}" -ne 40 ]; then
+	echo "archive signing subkey fingerprint must contain 40 hexadecimal characters" >&2
+	exit 1
+fi
+case "$fingerprint" in
+*[!0-9A-F]*)
+	echo "archive signing subkey fingerprint must be uppercase hexadecimal" >&2
+	exit 1
+	;;
+esac
+
+records=$(gpg --batch --with-colons --list-secret-keys "$fingerprint")
+
+if printf '%s\n' "$records" | awk -F: '
+    $1 == "sec" && $15 == "+" { found = 1 }
+    END { exit found ? 0 : 1 }
+'; then
+	echo "usable primary secret key material is not permitted in the build keyring" >&2
+	exit 1
+fi
+
+if ! printf '%s\n' "$records" | awk -F: -v target="$fingerprint" '
+    $1 == "ssb" {
+        candidate = ($12 ~ /s/ && $15 == "+")
+        next
+    }
+    $1 == "fpr" && candidate {
+        if ($10 == target)
+            found = 1
+        candidate = 0
+    }
+    END { exit found ? 0 : 1 }
+'; then
+	echo "protected signing subkey is not available: $fingerprint" >&2
+	exit 1
+fi
+
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT HUP INT TERM
+printf '%s' "$passphrase" >"$work/passphrase"
+printf '%s\n' 'archive signing key check' >"$work/probe"
+chmod 600 "$work/passphrase"
+
+gpg --batch --yes --pinentry-mode loopback \
+	--passphrase-file "$work/passphrase" --local-user "$fingerprint!" \
+	--detach-sign --output "$work/probe.sig" "$work/probe"

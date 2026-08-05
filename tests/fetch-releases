@@ -1,0 +1,96 @@
+#!/bin/sh
+
+set -eu
+
+top=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT HUP INT TERM
+mkdir -p "$work/bin"
+
+cat >"$work/bin/gh" <<'EOF'
+#!/bin/sh
+set -eu
+test "$1" = api
+test "$2" = repos/ChapelTech/knc/releases/latest
+cat "$MOCK_RELEASE"
+EOF
+
+cat >"$work/bin/curl" <<'EOF'
+#!/bin/sh
+set -eu
+output=
+url=
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	--output)
+		output=$2
+		shift 2
+		;;
+	--retry)
+		shift 2
+		;;
+	--*)
+		shift
+		;;
+	*)
+		url=$1
+		shift
+		;;
+	esac
+done
+test -n "$output"
+test -n "$url"
+printf '%s\n' "$url" >>"$MOCK_DOWNLOADS"
+printf '%s\n' fixture >"$output"
+EOF
+chmod 755 "$work/bin/gh" "$work/bin/curl"
+
+release=$work/release.json
+downloads=$work/downloads
+export MOCK_RELEASE="$release" MOCK_DOWNLOADS="$downloads"
+PATH=$work/bin:$PATH
+export PATH
+
+cat >"$release" <<'EOF'
+{
+  "tag_name": "v-test",
+  "draft": false,
+  "prerelease": false,
+  "immutable": true,
+  "assets": [
+    {
+      "name": "knc_1.12-1_amd64.deb",
+      "browser_download_url": "https://github.com/ChapelTech/knc/releases/download/v-test/knc_1.12-1_amd64.deb"
+    },
+    {
+      "name": "knc_1.12-1_arm64.deb",
+      "browser_download_url": "https://github.com/ChapelTech/knc/releases/download/v-test/knc_1.12-1_arm64.deb"
+    },
+    {
+      "name": "knc-1.12-1.el9.x86_64.rpm",
+      "browser_download_url": "https://github.com/ChapelTech/knc/releases/download/v-test/knc-1.12-1.el9.x86_64.rpm"
+    },
+    {
+      "name": "knc-1.12-1.el9.src.rpm",
+      "browser_download_url": "https://github.com/ChapelTech/knc/releases/download/v-test/knc-1.12-1.el9.src.rpm"
+    }
+  ]
+}
+EOF
+
+"$top/scripts/fetch-releases" "$work/artifacts"
+test "$(wc -l <"$work/artifacts/releases.tsv")" -eq 3
+test "$(wc -l <"$downloads")" -eq 3
+jq -en --rawfile manifest "$work/artifacts/releases.tsv" \
+	'$manifest | split("\n") | map(select(length > 0)) |
+        all(startswith("knc\tv-test\t"))' >/dev/null
+
+jq '.prerelease = true' "$release" >"$work/prerelease.json"
+MOCK_RELEASE=$work/prerelease.json
+export MOCK_RELEASE
+if "$top/scripts/fetch-releases" "$work/prerelease-artifacts" \
+	>"$work/prerelease.stdout" 2>"$work/prerelease.stderr"; then
+	echo "prerelease was not rejected" >&2
+	exit 1
+fi
+grep -q 'is not a stable release' "$work/prerelease.stderr"

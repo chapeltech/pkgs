@@ -1,0 +1,67 @@
+---
+name: Publish package repositories
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [package-release]
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: package-repository-publication
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: release-signing
+    env:
+      GNUPGHOME: ${{ runner.temp }}/archive-signing
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          fetch-depth: 0
+
+      - name: Install repository tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            apt-utils createrepo-c curl dpkg-dev gnupg jq rpm
+
+      - name: Import archive signing subkey
+        env:
+          ARCHIVE_SIGNING_KEY: ${{ secrets.ARCHIVE_SIGNING_KEY }}
+          ARCHIVE_SIGNING_PASSPHRASE: ${{ secrets.ARCHIVE_SIGNING_PASSPHRASE }}
+          ARCHIVE_SIGNING_SUBKEY_FINGERPRINT: ${{ vars.ARCHIVE_SIGNING_SUBKEY_FINGERPRINT }}
+        run: |
+          install -d -m 700 "$GNUPGHOME"
+          printf '%s' "$ARCHIVE_SIGNING_KEY" | gpg --batch --import
+          scripts/check-signing-key
+
+      - name: Fetch current releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/fetch-releases artifacts
+
+      - name: Build and validate repositories
+        env:
+          ARCHIVE_SIGNING_SUBKEY_FINGERPRINT: ${{ vars.ARCHIVE_SIGNING_SUBKEY_FINGERPRINT }}
+          ARCHIVE_SIGNING_PASSPHRASE: ${{ secrets.ARCHIVE_SIGNING_PASSPHRASE }}
+        run: |
+          scripts/build-repositories artifacts public
+          scripts/validate-output public
+
+      - name: Remove signing key material
+        if: ${{ always() }}
+        run: rm -rf "$GNUPGHOME"
+
+      - name: Publish generated branch
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          scripts/publish-branch public

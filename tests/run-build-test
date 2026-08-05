@@ -1,0 +1,115 @@
+#!/bin/sh
+
+set -eu
+
+passphrase=test-passphrase
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT HUP INT TERM
+artifacts=$work/artifacts
+full_gnupg=$work/full-gnupg
+signing_gnupg=$work/signing-gnupg
+rpmtop=$work/rpmbuild
+rpmdb=$work/rpmdb
+tag=v-test
+
+mkdir -m 700 "$full_gnupg"
+export GNUPGHOME="$full_gnupg"
+gpg --batch --pinentry-mode loopback --passphrase "$passphrase" \
+	--quick-gen-key 'Repository Test Primary <test@example.invalid>' \
+	rsa2048 cert 1d
+primary=$(gpg --batch --with-colons --list-secret-keys |
+	awk -F: '$1 == "fpr" { print $10; exit }')
+gpg --batch --pinentry-mode loopback --passphrase "$passphrase" \
+	--quick-add-key "$primary" rsa2048 sign 1d
+subkey=$(gpg --batch --with-colons --list-secret-keys "$primary" |
+	awk -F: '
+        $1 == "ssb" { candidate = 1; next }
+        $1 == "fpr" && candidate { print $10; exit }
+    ')
+
+ARCHIVE_SIGNING_SUBKEY_FINGERPRINT=$subkey
+ARCHIVE_SIGNING_PASSPHRASE=$passphrase
+export ARCHIVE_SIGNING_SUBKEY_FINGERPRINT ARCHIVE_SIGNING_PASSPHRASE
+
+if scripts/check-signing-key >/dev/null 2>&1; then
+	echo "full primary secret key was not rejected" >&2
+	exit 1
+fi
+
+mkdir -p "$artifacts/knc/$tag" "$rpmtop/SPECS"
+for arch in amd64 arm64; do
+	root=$work/deb-$arch
+	mkdir -p "$root/DEBIAN" "$root/usr/bin"
+	cat >"$root/DEBIAN/control" <<EOF
+Package: knc
+Version: 1.12-1
+Architecture: $arch
+Maintainer: ChapelTech <repo@chapeltech.uk>
+Description: synthetic KNC repository test package
+EOF
+	printf '#!/bin/sh\nexit 0\n' >"$root/usr/bin/knc"
+	chmod 755 "$root/usr/bin/knc"
+	dpkg-deb --build --root-owner-group "$root" \
+		"$artifacts/knc/$tag/knc_1.12-1_${arch}.deb" >/dev/null
+done
+
+cat >"$rpmtop/SPECS/knc.spec" <<'EOF'
+Name: knc
+Version: 1.12
+Release: 1%{?dist}
+Summary: Synthetic KNC repository test package
+License: MIT
+BuildArch: x86_64
+
+%description
+Synthetic package used only by the package repository integration test.
+
+%install
+mkdir -p %{buildroot}/usr/bin
+printf '#!/bin/sh\nexit 0\n' >%{buildroot}/usr/bin/knc-rpm-test
+chmod 0755 %{buildroot}/usr/bin/knc-rpm-test
+
+%files
+/usr/bin/knc-rpm-test
+EOF
+rpm --dbpath "$rpmdb" --initdb
+rpmbuild --quiet --define "_dbpath $rpmdb" \
+	--define "_topdir $rpmtop" --define 'dist .el9' \
+	-bb "$rpmtop/SPECS/knc.spec"
+rpm_path=$(find "$rpmtop/RPMS/x86_64" -type f -name '*.rpm' -print -quit)
+printf '%s\n' 'unlock RPM signing subkey' >"$work/rpm-signing-probe"
+gpg --batch --yes --pinentry-mode loopback --passphrase "$passphrase" \
+	--local-user "$subkey!" --detach-sign \
+	--output "$work/rpm-signing-probe.sig" "$work/rpm-signing-probe"
+cat >"$work/rpm-gpg" <<'EOF'
+#!/bin/sh
+if [ "${1:-}" = gpg ]; then
+	shift
+fi
+exec /usr/bin/gpg --batch --pinentry-mode loopback \
+	--passphrase "$RPM_SIGNING_PASSPHRASE" "$@"
+EOF
+chmod 755 "$work/rpm-gpg"
+RPM_SIGNING_PASSPHRASE=$passphrase
+export RPM_SIGNING_PASSPHRASE
+rpmsign --define "_dbpath $rpmdb" --define "__gpg $work/rpm-gpg" \
+	--addsign --key-id "$subkey!" \
+	"$rpm_path"
+rpm_name=$(basename -- "$rpm_path")
+cp "$rpm_path" "$artifacts/knc/$tag/$rpm_name"
+
+for name in knc_1.12-1_amd64.deb knc_1.12-1_arm64.deb "$rpm_name"; do
+	url=https://github.com/ChapelTech/knc/releases/download/$tag/$name
+	printf '%s\t%s\t%s\t%s\n' knc "$tag" "$name" "$url" \
+		>>"$artifacts/releases.tsv"
+done
+
+gpg --batch --armor --export-secret-subkeys "$subkey!" \
+	>"$work/archive-signing-subkey.asc"
+mkdir -m 700 "$signing_gnupg"
+export GNUPGHOME="$signing_gnupg"
+gpg --batch --import "$work/archive-signing-subkey.asc" >/dev/null
+
+scripts/check-signing-key
+scripts/build-repositories "$artifacts" public-test
+scripts/validate-output public-test
