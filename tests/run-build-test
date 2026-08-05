@@ -59,7 +59,7 @@ EOF
 		deb_name=${package}_1.0-1_${arch}.deb
 		dpkg-deb --build --root-owner-group "$root" \
 			"$artifacts/$repository/$tag/$deb_name" >/dev/null
-		url=https://github.com/ChapelTech/$repository/releases/download/$tag/$deb_name
+		url=https://github.com/chapeltech/$repository/releases/download/$tag/$deb_name
 		printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$deb_name" "$url" \
 			>>"$artifacts/releases.tsv"
 	done
@@ -94,7 +94,7 @@ EOF
 		"$rpm_path"
 	rpm_name=$(basename -- "$rpm_path")
 	cp "$rpm_path" "$artifacts/$repository/$tag/$rpm_name"
-	url=https://github.com/ChapelTech/$repository/releases/download/$tag/$rpm_name
+	url=https://github.com/chapeltech/$repository/releases/download/$tag/$rpm_name
 	printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$rpm_name" "$url" \
 		>>"$artifacts/releases.tsv"
 done

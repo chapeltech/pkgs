@@ -29,7 +29,7 @@ PY
 fi
 
 jq -e '
-    .organization == "ChapelTech" and
+    .organization == "chapeltech" and
     .repositories == [
         "prefork",
         "lnetd",

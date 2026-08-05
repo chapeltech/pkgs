@@ -12,8 +12,8 @@ cat >"$work/bin/gh" <<'EOF'
 set -eu
 test "$1" = api
 case "$2" in
-repos/ChapelTech/*/releases/latest)
-	repository=${2#repos/ChapelTech/}
+repos/chapeltech/*/releases/latest)
+	repository=${2#repos/chapeltech/}
 	repository=${repository%/releases/latest}
 	cat "$MOCK_RELEASE_DIR/$repository.json"
 	;;
@@ -70,19 +70,19 @@ cat >"$release_dir/$repository.json" <<EOF
   "assets": [
     {
       "name": "${repository}_1.0-1_amd64.deb",
-      "browser_download_url": "https://github.com/ChapelTech/$repository/releases/download/v-test/${repository}_1.0-1_amd64.deb"
+      "browser_download_url": "https://github.com/chapeltech/$repository/releases/download/v-test/${repository}_1.0-1_amd64.deb"
     },
     {
       "name": "${repository}_1.0-1_arm64.deb",
-      "browser_download_url": "https://github.com/ChapelTech/$repository/releases/download/v-test/${repository}_1.0-1_arm64.deb"
+      "browser_download_url": "https://github.com/chapeltech/$repository/releases/download/v-test/${repository}_1.0-1_arm64.deb"
     },
     {
       "name": "${repository}-1.0-1.el9.x86_64.rpm",
-      "browser_download_url": "https://github.com/ChapelTech/$repository/releases/download/v-test/${repository}-1.0-1.el9.x86_64.rpm"
+      "browser_download_url": "https://github.com/chapeltech/$repository/releases/download/v-test/${repository}-1.0-1.el9.x86_64.rpm"
     },
     {
       "name": "${repository}-1.0-1.el9.src.rpm",
-      "browser_download_url": "https://github.com/ChapelTech/$repository/releases/download/v-test/${repository}-1.0-1.el9.src.rpm"
+      "browser_download_url": "https://github.com/chapeltech/$repository/releases/download/v-test/${repository}-1.0-1.el9.src.rpm"
     }
   ]
 }
