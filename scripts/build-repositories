@@ -103,8 +103,8 @@ while IFS='	' read -r repository tag name url extra; do
 		    --qf '%{RSAHEADER:pgpsig}%{DSAHEADER:pgpsig}%{SIGPGP:pgpsig}%{SIGGPG:pgpsig}' \
 		    "$source")
 		if [ "$signature" = '(none)(none)(none)(none)' ]; then
-			echo "unsigned RPM is not publishable: $name" >&2
-			exit 1
+			echo "ignoring unsigned legacy RPM: $name" >&2
+			continue
 		fi
 		rpmkeys --define "_dbpath $rpmdb" --checksig "$source" |
 		    grep -q 'digests signatures OK$'
@@ -135,7 +135,7 @@ done
 (
 	cd "$output/debian"
 	for arch in amd64 arm64; do
-		dpkg-scanpackages --arch "$arch" --multiversion pool /dev/null \
+		dpkg-scanpackages --arch "$arch" pool /dev/null \
 		    >"dists/trixie/main/binary-$arch/Packages"
 		gzip -9n -c "dists/trixie/main/binary-$arch/Packages" \
 		    >"dists/trixie/main/binary-$arch/Packages.gz"

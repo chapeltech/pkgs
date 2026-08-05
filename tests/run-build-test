@@ -87,6 +87,11 @@ EOF
 		-bb "$rpmtop/SPECS/$package.spec"
 	rpm_path=$(find "$rpmtop/RPMS/x86_64" -type f \
 		-name "$package-*.rpm" -print -quit)
+	unsigned_name=legacy-$(basename -- "$rpm_path")
+	cp "$rpm_path" "$artifacts/$repository/$tag/$unsigned_name"
+	url=https://github.com/chapeltech/$repository/releases/download/$tag/$unsigned_name
+	printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$unsigned_name" "$url" \
+		>>"$artifacts/releases.tsv"
 	rpmsign --addsign \
 		--define "_dbpath $rpmdb" \
 		--define "_gpg_name $subkey" \

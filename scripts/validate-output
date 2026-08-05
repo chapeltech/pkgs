@@ -83,6 +83,10 @@ fi
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT HUP INT TERM
 gzip -cd "$1" >"$work/primary.xml"
+if grep -q 'legacy-' "$work/primary.xml"; then
+	echo "unsigned legacy RPM found in repository metadata" >&2
+	exit 1
+fi
 grep -q "<location href=\"Packages/github/$organization/" \
 	"$work/primary.xml"
 sed -n 's/.*<location href="\([^"]*\)".*/\1/p' "$work/primary.xml" |
