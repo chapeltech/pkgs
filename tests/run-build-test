@@ -36,28 +36,39 @@ if scripts/check-signing-key >/dev/null 2>&1; then
 	exit 1
 fi
 
-mkdir -p "$artifacts/knc/$tag" "$rpmtop/SPECS"
-for arch in amd64 arm64; do
-	root=$work/deb-$arch
-	mkdir -p "$root/DEBIAN" "$root/usr/bin"
-	cat >"$root/DEBIAN/control" <<EOF
-Package: knc
-Version: 1.12-1
+mkdir -p "$rpmtop/SPECS"
+rpm --define "_dbpath $rpmdb" --initdb
+printf '%s' "$passphrase" >"$work/passphrase"
+chmod 600 "$work/passphrase"
+
+for repository in $(jq -r '.repositories[]' packages.json); do
+	package=$(printf '%s' "$repository" | tr _ -)
+	mkdir -p "$artifacts/$repository/$tag"
+	for arch in amd64 arm64; do
+		root=$work/deb-$package-$arch
+		mkdir -p "$root/DEBIAN" "$root/usr/bin"
+		cat >"$root/DEBIAN/control" <<EOF
+Package: $package
+Version: 1.0-1
 Architecture: $arch
 Maintainer: ChapelTech <repo@chapeltech.uk>
-Description: synthetic KNC repository test package
+Description: synthetic $repository repository test package
 EOF
-	printf '#!/bin/sh\nexit 0\n' >"$root/usr/bin/knc"
-	chmod 755 "$root/usr/bin/knc"
-	dpkg-deb --build --root-owner-group "$root" \
-		"$artifacts/knc/$tag/knc_1.12-1_${arch}.deb" >/dev/null
-done
+		printf '#!/bin/sh\nexit 0\n' >"$root/usr/bin/$package"
+		chmod 755 "$root/usr/bin/$package"
+		deb_name=${package}_1.0-1_${arch}.deb
+		dpkg-deb --build --root-owner-group "$root" \
+			"$artifacts/$repository/$tag/$deb_name" >/dev/null
+		url=https://github.com/ChapelTech/$repository/releases/download/$tag/$deb_name
+		printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$deb_name" "$url" \
+			>>"$artifacts/releases.tsv"
+	done
 
-cat >"$rpmtop/SPECS/knc.spec" <<'EOF'
-Name: knc
-Version: 1.12
+	cat >"$rpmtop/SPECS/$package.spec" <<EOF
+Name: $package
+Version: 1.0
 Release: 1%{?dist}
-Summary: Synthetic KNC repository test package
+Summary: Synthetic $repository repository test package
 License: MIT
 BuildArch: x86_64
 
@@ -65,46 +76,31 @@ BuildArch: x86_64
 Synthetic package used only by the package repository integration test.
 
 %install
-mkdir -p %{buildroot}/usr/bin
-printf '#!/bin/sh\nexit 0\n' >%{buildroot}/usr/bin/knc-rpm-test
-chmod 0755 %{buildroot}/usr/bin/knc-rpm-test
+mkdir -p %{buildroot}/usr/share/$package
+touch %{buildroot}/usr/share/$package/repository-test
 
 %files
-/usr/bin/knc-rpm-test
+/usr/share/$package/repository-test
 EOF
-rpm --dbpath "$rpmdb" --initdb
-rpmbuild --quiet --define "_dbpath $rpmdb" \
-	--define "_topdir $rpmtop" --define 'dist .el9' \
-	-bb "$rpmtop/SPECS/knc.spec"
-rpm_path=$(find "$rpmtop/RPMS/x86_64" -type f -name '*.rpm' -print -quit)
-printf '%s\n' 'unlock RPM signing subkey' >"$work/rpm-signing-probe"
-gpg --batch --yes --pinentry-mode loopback --passphrase "$passphrase" \
-	--local-user "$subkey!" --detach-sign \
-	--output "$work/rpm-signing-probe.sig" "$work/rpm-signing-probe"
-cat >"$work/rpm-gpg" <<'EOF'
-#!/bin/sh
-if [ "${1:-}" = gpg ]; then
-	shift
-fi
-exec /usr/bin/gpg --batch --pinentry-mode loopback \
-	--passphrase "$RPM_SIGNING_PASSPHRASE" "$@"
-EOF
-chmod 755 "$work/rpm-gpg"
-RPM_SIGNING_PASSPHRASE=$passphrase
-export RPM_SIGNING_PASSPHRASE
-rpmsign --define "_dbpath $rpmdb" --define "__gpg $work/rpm-gpg" \
-	--addsign --key-id "$subkey!" \
-	"$rpm_path"
-rpm_name=$(basename -- "$rpm_path")
-cp "$rpm_path" "$artifacts/knc/$tag/$rpm_name"
-
-for name in knc_1.12-1_amd64.deb knc_1.12-1_arm64.deb "$rpm_name"; do
-	url=https://github.com/ChapelTech/knc/releases/download/$tag/$name
-	printf '%s\t%s\t%s\t%s\n' knc "$tag" "$name" "$url" \
+	rpmbuild --quiet --define "_dbpath $rpmdb" \
+		--define "_topdir $rpmtop" --define 'dist .el9' \
+		-bb "$rpmtop/SPECS/$package.spec"
+	rpm_path=$(find "$rpmtop/RPMS/x86_64" -type f \
+		-name "$package-*.rpm" -print -quit)
+	rpmsign --addsign \
+		--define "_dbpath $rpmdb" \
+		--define "_gpg_name $subkey" \
+		--define "_gpg_sign_cmd_extra_args --batch --pinentry-mode loopback --passphrase-file $work/passphrase" \
+		"$rpm_path"
+	rpm_name=$(basename -- "$rpm_path")
+	cp "$rpm_path" "$artifacts/$repository/$tag/$rpm_name"
+	url=https://github.com/ChapelTech/$repository/releases/download/$tag/$rpm_name
+	printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$rpm_name" "$url" \
 		>>"$artifacts/releases.tsv"
 done
 
-gpg --batch --armor --export-secret-subkeys "$subkey!" \
+gpg --batch --pinentry-mode loopback --passphrase "$passphrase" \
+	--armor --export-secret-subkeys "$subkey!" \
 	>"$work/archive-signing-subkey.asc"
 mkdir -m 700 "$signing_gnupg"
 export GNUPGHOME="$signing_gnupg"

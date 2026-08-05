@@ -35,8 +35,8 @@ gpg --batch --armor --export "$fingerprint" \
 	>"$output/keys/chapeltech-archive-keyring.asc"
 
 rpmdb=$work/rpmdb
-rpm --dbpath "$rpmdb" --initdb
-rpm --dbpath "$rpmdb" --import \
+rpm --define "_dbpath $rpmdb" --initdb
+rpmkeys --define "_dbpath $rpmdb" --import \
 	"$output/keys/chapeltech-archive-keyring.asc"
 
 while IFS='	' read -r repository tag name url extra; do
@@ -90,7 +90,7 @@ while IFS='	' read -r repository tag name url extra; do
 		destination=$output/debian/pool/github/$organization/$repository/releases/download/$tag/$name
 		;;
 	*.rpm)
-		arch=$(rpm -qp --qf '%{ARCH}' "$source")
+		arch=$(rpm --define "_dbpath $rpmdb" -qp --qf '%{ARCH}' "$source")
 		case "$arch" in
 		x86_64|noarch)
 			;;
@@ -99,12 +99,15 @@ while IFS='	' read -r repository tag name url extra; do
 			continue
 			;;
 		esac
-		signature=$(rpm -qp --qf '%{RSAHEADER:pgpsig}%{DSAHEADER:pgpsig}%{SIGPGP:pgpsig}%{SIGGPG:pgpsig}' "$source")
+		signature=$(rpm --define "_dbpath $rpmdb" -qp \
+		    --qf '%{RSAHEADER:pgpsig}%{DSAHEADER:pgpsig}%{SIGPGP:pgpsig}%{SIGGPG:pgpsig}' \
+		    "$source")
 		if [ "$signature" = '(none)(none)(none)(none)' ]; then
 			echo "unsigned RPM is not publishable: $name" >&2
 			exit 1
 		fi
-		rpmkeys --dbpath "$rpmdb" --checksig "$source" >/dev/null
+		rpmkeys --define "_dbpath $rpmdb" --checksig "$source" |
+		    grep -q 'digests signatures OK$'
 		touch "$work/seen/$repository-rpm-$arch"
 		destination=$output/rpm/el9/x86_64/Packages/github/$organization/$repository/releases/download/$tag/$name
 		;;

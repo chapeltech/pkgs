@@ -11,8 +11,17 @@ cat >"$work/bin/gh" <<'EOF'
 #!/bin/sh
 set -eu
 test "$1" = api
-test "$2" = repos/ChapelTech/knc/releases/latest
-cat "$MOCK_RELEASE"
+case "$2" in
+repos/ChapelTech/*/releases/latest)
+	repository=${2#repos/ChapelTech/}
+	repository=${repository%/releases/latest}
+	cat "$MOCK_RELEASE_DIR/$repository.json"
+	;;
+*)
+	echo "unexpected API request: $2" >&2
+	exit 1
+	;;
+esac
 EOF
 
 cat >"$work/bin/curl" <<'EOF'
@@ -45,49 +54,54 @@ printf '%s\n' fixture >"$output"
 EOF
 chmod 755 "$work/bin/gh" "$work/bin/curl"
 
-release=$work/release.json
+release_dir=$work/releases
 downloads=$work/downloads
-export MOCK_RELEASE="$release" MOCK_DOWNLOADS="$downloads"
+mkdir -p "$release_dir"
+export MOCK_RELEASE_DIR="$release_dir" MOCK_DOWNLOADS="$downloads"
 PATH=$work/bin:$PATH
 export PATH
 
-cat >"$release" <<'EOF'
+for repository in $(jq -r '.repositories[]' "$top/packages.json"); do
+cat >"$release_dir/$repository.json" <<EOF
 {
   "tag_name": "v-test",
   "draft": false,
   "prerelease": false,
-  "immutable": true,
   "assets": [
     {
-      "name": "knc_1.12-1_amd64.deb",
-      "browser_download_url": "https://github.com/ChapelTech/knc/releases/download/v-test/knc_1.12-1_amd64.deb"
+      "name": "${repository}_1.0-1_amd64.deb",
+      "browser_download_url": "https://github.com/ChapelTech/$repository/releases/download/v-test/${repository}_1.0-1_amd64.deb"
     },
     {
-      "name": "knc_1.12-1_arm64.deb",
-      "browser_download_url": "https://github.com/ChapelTech/knc/releases/download/v-test/knc_1.12-1_arm64.deb"
+      "name": "${repository}_1.0-1_arm64.deb",
+      "browser_download_url": "https://github.com/ChapelTech/$repository/releases/download/v-test/${repository}_1.0-1_arm64.deb"
     },
     {
-      "name": "knc-1.12-1.el9.x86_64.rpm",
-      "browser_download_url": "https://github.com/ChapelTech/knc/releases/download/v-test/knc-1.12-1.el9.x86_64.rpm"
+      "name": "${repository}-1.0-1.el9.x86_64.rpm",
+      "browser_download_url": "https://github.com/ChapelTech/$repository/releases/download/v-test/${repository}-1.0-1.el9.x86_64.rpm"
     },
     {
-      "name": "knc-1.12-1.el9.src.rpm",
-      "browser_download_url": "https://github.com/ChapelTech/knc/releases/download/v-test/knc-1.12-1.el9.src.rpm"
+      "name": "${repository}-1.0-1.el9.src.rpm",
+      "browser_download_url": "https://github.com/ChapelTech/$repository/releases/download/v-test/${repository}-1.0-1.el9.src.rpm"
     }
   ]
 }
 EOF
+done
 
 "$top/scripts/fetch-releases" "$work/artifacts"
-test "$(wc -l <"$work/artifacts/releases.tsv")" -eq 3
-test "$(wc -l <"$downloads")" -eq 3
-jq -en --rawfile manifest "$work/artifacts/releases.tsv" \
-	'$manifest | split("\n") | map(select(length > 0)) |
-        all(startswith("knc\tv-test\t"))' >/dev/null
+repository_count=$(jq '.repositories | length' "$top/packages.json")
+test "$(wc -l <"$work/artifacts/releases.tsv")" -eq "$((repository_count * 3))"
+test "$(wc -l <"$downloads")" -eq "$((repository_count * 3))"
+for repository in $(jq -r '.repositories[]' "$top/packages.json"); do
+	test "$(awk -F '\t' -v repository="$repository" \
+	    '$1 == repository && $2 == "v-test" { count++ } END { print count + 0 }' \
+	    "$work/artifacts/releases.tsv")" -eq 3
+done
 
-jq '.prerelease = true' "$release" >"$work/prerelease.json"
-MOCK_RELEASE=$work/prerelease.json
-export MOCK_RELEASE
+jq '.prerelease = true' "$release_dir/prefork.json" \
+	>"$release_dir/prefork-prerelease.json"
+mv "$release_dir/prefork-prerelease.json" "$release_dir/prefork.json"
 if "$top/scripts/fetch-releases" "$work/prerelease-artifacts" \
 	>"$work/prerelease.stdout" 2>"$work/prerelease.stderr"; then
 	echo "prerelease was not rejected" >&2

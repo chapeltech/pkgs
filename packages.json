@@ -1,6 +1,11 @@
 {
   "organization": "ChapelTech",
   "repositories": [
-    "knc"
+    "prefork",
+    "lnetd",
+    "knc",
+    "kharon",
+    "krb5_admin",
+    "krb5_keytab"
   ]
 }

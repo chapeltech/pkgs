@@ -30,7 +30,14 @@ fi
 
 jq -e '
     .organization == "ChapelTech" and
-    .repositories == ["knc"]
+    .repositories == [
+        "prefork",
+        "lnetd",
+        "knc",
+        "kharon",
+        "krb5_admin",
+        "krb5_keytab"
+    ]
 ' "$top/packages.json" >/dev/null
 
 git -C "$top" check-ignore -q artifacts/example

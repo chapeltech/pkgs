@@ -8,6 +8,9 @@ if [ "$#" -gt 1 ]; then
 fi
 
 output=${1:-public}
+top=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+manifest=$top/packages.json
+organization=$(jq -er .organization "$manifest")
 
 test -s "$output/debian/dists/trixie/InRelease"
 test -s "$output/debian/dists/trixie/Release"
@@ -44,7 +47,7 @@ for arch in amd64 arm64; do
 	fi
 	sed -n 's/^Filename: //p' "$packages" | while IFS= read -r filename; do
 		case "$filename" in
-		pool/github/ChapelTech/knc/releases/download/*/*.deb)
+		pool/github/$organization/*/releases/download/*/*.deb)
 			;;
 		*)
 			echo "non-canonical Debian payload URL: $filename" >&2
@@ -57,8 +60,18 @@ for arch in amd64 arm64; do
 			exit 1
 			;;
 		esac
+		relative=${filename#pool/github/"$organization"/}
+		repository=${relative%%/*}
+		if ! jq -e --arg repository "$repository" \
+		    '.repositories | index($repository) != null' "$manifest" >/dev/null; then
+			echo "unconfigured Debian payload repository: $repository" >&2
+			exit 1
+		fi
 	done
-	grep -q '^Filename: pool/github/ChapelTech/knc/releases/download/' "$packages"
+	for repository in $(jq -r '.repositories[]' "$manifest"); do
+		grep -q "^Filename: pool/github/$organization/$repository/releases/download/" \
+		    "$packages"
+	done
 done
 
 set -- "$output/rpm/el9/x86_64/repodata/"*-primary.xml.gz
@@ -70,12 +83,12 @@ fi
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT HUP INT TERM
 gzip -cd "$1" >"$work/primary.xml"
-grep -q '<location href="Packages/github/ChapelTech/knc/releases/download/' \
+grep -q "<location href=\"Packages/github/$organization/" \
 	"$work/primary.xml"
 sed -n 's/.*<location href="\([^"]*\)".*/\1/p' "$work/primary.xml" |
 while IFS= read -r location; do
 	case "$location" in
-	Packages/github/ChapelTech/knc/releases/download/*/*.rpm)
+	Packages/github/$organization/*/releases/download/*/*.rpm)
 		;;
 	*)
 		echo "non-canonical RPM payload URL: $location" >&2
@@ -88,6 +101,18 @@ while IFS= read -r location; do
 		exit 1
 		;;
 	esac
+	relative=${location#Packages/github/"$organization"/}
+	repository=${relative%%/*}
+	if ! jq -e --arg repository "$repository" \
+	    '.repositories | index($repository) != null' "$manifest" >/dev/null; then
+		echo "unconfigured RPM payload repository: $repository" >&2
+		exit 1
+	fi
+done
+
+for repository in $(jq -r '.repositories[]' "$manifest"); do
+	grep -q "<location href=\"Packages/github/$organization/$repository/releases/download/" \
+	    "$work/primary.xml"
 done
 
 if find "$output" \( -type l -o -type f \( -name '*.deb' -o -name '*.rpm' \) \) \

@@ -1,15 +1,24 @@
 # ChapelTech package repositories
 
-This repository builds the KNC package repositories served from
+This repository builds the ChapelTech package repositories served from
 `https://repo.chapeltech.uk`.
+
+The current package set is:
+
+* prefork
+* lnetd
+* knc
+* kharon
+* krb5_admin
+* krb5_keytab
 
 Debian packages are published for Debian 13 (Trixie) on `amd64` and `arm64`.
 RPM packages are published for EL9 on `x86_64`. Package payloads remain in
-the ChapelTech/knc GitHub release; Cloudflare Pages serves signed
+the projects' GitHub releases; Cloudflare Pages serves signed
 metadata and redirects package downloads to the corresponding versioned
 release asset with HTTP 302 responses.
 
-Publication requires a stable latest KNC release containing `amd64` and
+Publication requires every stable latest release to contain `amd64` and
 `arm64` Debian packages and signed `x86_64` RPM packages. The fetch step fails
 closed while any of those release prerequisites are unavailable.
 
