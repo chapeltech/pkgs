@@ -178,7 +178,8 @@ cat >"$output/wrangler.jsonc" <<'EOF'
   "name": "aged-disk-d163",
   "compatibility_date": "2026-08-06",
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "html_handling": "none"
   }
 }
 EOF
@@ -186,6 +187,7 @@ EOF
 cat >"$output/.assetsignore" <<'EOF'
 wrangler.jsonc
 .assetsignore
+.wrangler
 EOF
 
 mkdir -p "$output/config"

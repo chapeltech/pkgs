@@ -134,11 +134,13 @@ cmp "$work/redirects" "$output/_redirects"
 jq -e '
     .name == "aged-disk-d163" and
     .compatibility_date == "2026-08-06" and
-    .assets.directory == "."
+    .assets.directory == "." and
+    .assets.html_handling == "none"
 ' "$output/wrangler.jsonc" >/dev/null
 
 cat >"$work/assetsignore" <<'EOF'
 wrangler.jsonc
 .assetsignore
+.wrangler
 EOF
 cmp "$work/assetsignore" "$output/.assetsignore"
