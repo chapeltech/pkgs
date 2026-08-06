@@ -109,16 +109,16 @@ Description: Kerberos administration framework code for only the kdc
  Kerberos administration framework the parts that go on the kdc
 
 Package: lnetd
-Version: 0.2-2
+Version: 0.3-2
 Architecture: arm64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 82
 Depends: libc6 (>= 2.34)
-Filename: pool/github/chapeltech/lnetd/releases/download/v0.2/lnetd_0.2-2_arm64.deb
-Size: 7956
-MD5sum: 4e7cc1005321d6cbc946f68e614ffb71
-SHA1: fef03183ad1e2c39358bc8cd3b37ee5097528a1e
-SHA256: 2719df151b21937bb093ea5f1590f2113d9d588ac5544032bc15f2aec1bc107b
+Filename: pool/github/chapeltech/lnetd/releases/download/v0.3/lnetd_0.3-2_arm64.deb
+Size: 8036
+MD5sum: dd345528a9fdf908622259ab05223d22
+SHA1: 072416be3280c9233b0fdbad073e1479b2a41284
+SHA256: f4457f11697336645784cff1627739ec834a2ae17ed5eaee51f66463b06d75b7
 Section: net
 Priority: optional
 Homepage: https://github.com/ChapelTech/lnetd
@@ -128,17 +128,17 @@ Description: lightweight inetd-style UNIX socket listener
 
 Package: lnetd-dbgsym
 Source: lnetd
-Version: 0.2-2
+Version: 0.3-2
 Auto-Built-Package: debug-symbols
 Architecture: arm64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 39
-Depends: lnetd (= 0.2-2)
-Filename: pool/github/chapeltech/lnetd/releases/download/v0.2/lnetd-dbgsym_0.2-2_arm64.deb
-Size: 13708
-MD5sum: a2d500c4483d7eddb35c2b2400523799
-SHA1: d2364a3dcdf84b61835880f815dacd388e384720
-SHA256: 0ab19288ab15f11eaef87f3aca210bcdfc9c4c0fd52c14d283bc0d0c19103270
+Depends: lnetd (= 0.3-2)
+Filename: pool/github/chapeltech/lnetd/releases/download/v0.3/lnetd-dbgsym_0.3-2_arm64.deb
+Size: 13712
+MD5sum: c3d7648de4cc3cf5b938a7d8f14792f3
+SHA1: 32ab515f6a7a2c1115fe27c8e241d1034acd81b5
+SHA256: 8ce20c7c016f6079df6d1a206a4f5b3190e5d689a743a2e44958f76c7eaebe7b
 Section: debug
 Priority: optional
 Description: debug symbols for lnetd

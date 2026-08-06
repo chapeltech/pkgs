@@ -8,8 +8,8 @@
 /alpine/v3.24/main/aarch64/libkrb5admin-perl-doc-0.4.3-r0.apk https://github.com/chapeltech/krb5_admin/releases/download/v0.4.3/libkrb5admin-perl-doc-0.4.3-r0.aarch64.apk 302
 /alpine/v3.24/main/aarch64/libkrb5admin-perl-kdc-0.4.3-r0.apk https://github.com/chapeltech/krb5_admin/releases/download/v0.4.3/libkrb5admin-perl-kdc-0.4.3-r0.aarch64.apk 302
 /alpine/v3.24/main/aarch64/libkrb5admin-perl-systemd-0.4.3-r0.apk https://github.com/chapeltech/krb5_admin/releases/download/v0.4.3/libkrb5admin-perl-systemd-0.4.3-r0.aarch64.apk 302
-/alpine/v3.24/main/aarch64/lnetd-0.2-r0.apk https://github.com/chapeltech/lnetd/releases/download/v0.2/lnetd-0.2-r0.aarch64.apk 302
-/alpine/v3.24/main/aarch64/lnetd-doc-0.2-r0.apk https://github.com/chapeltech/lnetd/releases/download/v0.2/lnetd-doc-0.2-r0.aarch64.apk 302
+/alpine/v3.24/main/aarch64/lnetd-0.3-r0.apk https://github.com/chapeltech/lnetd/releases/download/v0.3/lnetd-0.3-r0.aarch64.apk 302
+/alpine/v3.24/main/aarch64/lnetd-doc-0.3-r0.apk https://github.com/chapeltech/lnetd/releases/download/v0.3/lnetd-doc-0.3-r0.aarch64.apk 302
 /alpine/v3.24/main/aarch64/prefork-0.4-r1.apk https://github.com/chapeltech/prefork/releases/download/v0.4/prefork-0.4-r1.aarch64.apk 302
 /alpine/v3.24/main/aarch64/prefork-doc-0.4-r1.apk https://github.com/chapeltech/prefork/releases/download/v0.4/prefork-doc-0.4-r1.aarch64.apk 302
 /alpine/v3.24/main/x86_64/krb5keytab-0.4-r0.apk https://github.com/chapeltech/krb5_keytab/releases/download/v0.4/krb5keytab-0.4-r0.x86_64.apk 302
@@ -20,7 +20,7 @@
 /alpine/v3.24/main/x86_64/libkrb5admin-perl-doc-0.4.3-r0.apk https://github.com/chapeltech/krb5_admin/releases/download/v0.4.3/libkrb5admin-perl-doc-0.4.3-r0.x86_64.apk 302
 /alpine/v3.24/main/x86_64/libkrb5admin-perl-kdc-0.4.3-r0.apk https://github.com/chapeltech/krb5_admin/releases/download/v0.4.3/libkrb5admin-perl-kdc-0.4.3-r0.x86_64.apk 302
 /alpine/v3.24/main/x86_64/libkrb5admin-perl-systemd-0.4.3-r0.apk https://github.com/chapeltech/krb5_admin/releases/download/v0.4.3/libkrb5admin-perl-systemd-0.4.3-r0.x86_64.apk 302
-/alpine/v3.24/main/x86_64/lnetd-0.2-r0.apk https://github.com/chapeltech/lnetd/releases/download/v0.2/lnetd-0.2-r0.x86_64.apk 302
-/alpine/v3.24/main/x86_64/lnetd-doc-0.2-r0.apk https://github.com/chapeltech/lnetd/releases/download/v0.2/lnetd-doc-0.2-r0.x86_64.apk 302
+/alpine/v3.24/main/x86_64/lnetd-0.3-r0.apk https://github.com/chapeltech/lnetd/releases/download/v0.3/lnetd-0.3-r0.x86_64.apk 302
+/alpine/v3.24/main/x86_64/lnetd-doc-0.3-r0.apk https://github.com/chapeltech/lnetd/releases/download/v0.3/lnetd-doc-0.3-r0.x86_64.apk 302
 /alpine/v3.24/main/x86_64/prefork-0.4-r1.apk https://github.com/chapeltech/prefork/releases/download/v0.4/prefork-0.4-r1.x86_64.apk 302
 /alpine/v3.24/main/x86_64/prefork-doc-0.4-r1.apk https://github.com/chapeltech/prefork/releases/download/v0.4/prefork-doc-0.4-r1.x86_64.apk 302
