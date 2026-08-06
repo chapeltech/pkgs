@@ -1,3 +1,42 @@
+Package: knc
+Version: 1.13-1
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 77
+Depends: libc6 (>= 2.34), libgssapi3t64-heimdal (>= 1.4.0+git20110226)
+Filename: pool/github/chapeltech/knc/releases/download/v1.13/knc_1.13-1_amd64.deb
+Size: 28568
+MD5sum: 5a265009d2762a905da2584c8fc0270f
+SHA1: a414ec241cee3848217b59e788ff605a96fd9b92
+SHA256: a1580e907bc31d4d34343dbb457909ba4a2997765959e5d7cf290edca2c64f16
+Section: unknown
+Priority: extra
+Homepage: https://github.com/ChapelTech/knc
+Description: Kerberised NetCat
+     The KNC protocol provides an 8-bit clean, mutually authenticated
+     Kerberised tunnel between two endpoints.
+     .
+     This package provides an executable which implements the KNC
+     protocol.  The client and server are the same executable.
+
+Package: knc-dbgsym
+Source: knc
+Version: 1.13-1
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 74
+Depends: knc (= 1.13-1)
+Filename: pool/github/chapeltech/knc/releases/download/v1.13/knc-dbgsym_1.13-1_amd64.deb
+Size: 43580
+MD5sum: dc3c3e183951bce6a990df9e2bfc2cb5
+SHA1: e90e66bd87a215be7789020e6fa452b4a3bbd834
+SHA256: a28f2fdd5463f411028fd735e5c9778dbe059c7d87e99b260bda1c9700f1d59a
+Section: debug
+Priority: optional
+Description: debug symbols for knc
+Build-Ids: 805b6459bffbace5bcb1db95b0a154e71eff7ef7
+
 Package: krb5keytab
 Version: 0.4-1
 Architecture: amd64
@@ -72,6 +111,67 @@ Section: debug
 Priority: optional
 Description: debug symbols for libkharon-perl
 Build-Ids: 77b90848800e610a5ad7a0d040c3a832e2c23b8d
+
+Package: libknc
+Source: knc
+Version: 1.13-1
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 57
+Depends: libc6 (>= 2.34), libgssapi3t64-heimdal (>= 1.4.0+git20110226)
+Filename: pool/github/chapeltech/knc/releases/download/v1.13/libknc_1.13-1_amd64.deb
+Size: 16988
+MD5sum: 0b4191b7827bb0b0c888f987ded1d38f
+SHA1: 8a54fb6cfb9b3882d1c802b1e0df56a4ad06c1dc
+SHA256: f727cefe3b9ad50890eb360aff6125ff4d000edd6950a77a106ac617cb36c4ce
+Section: unknown
+Priority: extra
+Homepage: https://github.com/ChapelTech/knc
+Description: Kerberised Netcat library
+     The KNC protocol provides an 8-bit clean, mutually authenticated
+     Kerberised tunnel between two endpoints.
+     .
+     This package contains a library which implements the KNC protocol.
+
+Package: libknc-dbgsym
+Source: knc
+Version: 1.13-1
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 60
+Depends: libknc (= 1.13-1)
+Filename: pool/github/chapeltech/knc/releases/download/v1.13/libknc-dbgsym_1.13-1_amd64.deb
+Size: 43480
+MD5sum: a8450a83bd8486d6b5294e80de9ba392
+SHA1: 72b10371ea43beca1ddaf1f18dfafc231a6d1730
+SHA256: 56c3c7526008c4f67588e90dbfba3216a014de678833b78ea3703a5660eb5162
+Section: debug
+Priority: optional
+Description: debug symbols for libknc
+Build-Ids: 66a2047e0fc65a7d133876dbe0b91696fe7df2a5
+
+Package: libknc-dev
+Source: knc
+Version: 1.13-1
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 76
+Depends: libknc (= 1.13-1), heimdal-dev
+Filename: pool/github/chapeltech/knc/releases/download/v1.13/libknc-dev_1.13-1_amd64.deb
+Size: 25780
+MD5sum: 0aab617b0ef8c0360181b52321d971a3
+SHA1: d0efeba7de21aa9e9d1628879e8c4042fda584f1
+SHA256: 69faf5d1c7c4855a7f6c081f78b22ebb232211be8ad4cf00e359899cc86ea0c5
+Section: unknown
+Priority: extra
+Homepage: https://github.com/ChapelTech/knc
+Description: Kerberised NetCat
+     The KNC protocol provides an 8-bit clean, mutually authenticated
+     Kerberised tunnel between two endpoints.
+     .
+     This is the development package, required for building programs
+     using libknc.
 
 Package: libkrb5admin-perl
 Version: 0.4.3-1
