@@ -18,7 +18,7 @@ on:
       ARCHIVE_SIGNING_PASSPHRASE:
         required: true
       PKGS_DISPATCH_TOKEN:
-        required: true
+        required: false
 
 permissions:
   contents: read
