@@ -173,6 +173,21 @@ cat >"$output/_redirects" <<'EOF'
 /rpm/el9/x86_64/Packages/github/* https://github.com/:splat 302
 EOF
 
+cat >"$output/wrangler.jsonc" <<'EOF'
+{
+  "name": "aged-disk-d163",
+  "compatibility_date": "2026-08-06",
+  "assets": {
+    "directory": "."
+  }
+}
+EOF
+
+cat >"$output/.assetsignore" <<'EOF'
+wrangler.jsonc
+.assetsignore
+EOF
+
 mkdir -p "$output/config"
 cat >"$output/config/chapeltech.sources" <<'EOF'
 Types: deb

@@ -130,3 +130,15 @@ cat >"$work/redirects" <<'EOF'
 /rpm/el9/x86_64/Packages/github/* https://github.com/:splat 302
 EOF
 cmp "$work/redirects" "$output/_redirects"
+
+jq -e '
+    .name == "aged-disk-d163" and
+    .compatibility_date == "2026-08-06" and
+    .assets.directory == "."
+' "$output/wrangler.jsonc" >/dev/null
+
+cat >"$work/assetsignore" <<'EOF'
+wrangler.jsonc
+.assetsignore
+EOF
+cmp "$work/assetsignore" "$output/.assetsignore"
