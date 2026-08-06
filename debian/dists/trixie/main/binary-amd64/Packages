@@ -145,16 +145,16 @@ Description: debug symbols for lnetd
 Build-Ids: 5dac990e1421d2f43b6825f575660af9488211dd
 
 Package: prefork
-Version: 0.3-2
+Version: 0.4-1
 Architecture: amd64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 34
 Depends: libc6 (>= 2.34)
-Filename: pool/github/chapeltech/prefork/releases/download/v0.3/prefork_0.3-2_amd64.deb
-Size: 8224
-MD5sum: 05f13074a51263cee163a3899aab915b
-SHA1: 1906ff2e6b8b8c04274a86a28275130e01315d11
-SHA256: 091d4f75b2fc5c31e87fcc6b23781af5f65c43d4340a7bded65f197a35fef8a8
+Filename: pool/github/chapeltech/prefork/releases/download/v0.4/prefork_0.4-1_amd64.deb
+Size: 8228
+MD5sum: 0820e81e9e104f71a72a1e6cb6743f82
+SHA1: b8f3e7a4e7e0b3bdededfc54293289f32b4b34ba
+SHA256: b18e25338dd581ed023d130f0b1760b59a1b3a5d08a5b7be7b1c31afe1c0424f
 Section: utils
 Priority: optional
 Homepage: https://github.com/ChapelTech/prefork
