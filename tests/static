@@ -15,18 +15,25 @@ if command -v shellcheck >/dev/null 2>&1; then
 		"$top"/tests/static
 fi
 
+workflows="$top/.github/workflows/publish.yml
+$top/.github/workflows/release-packages.yml"
+
 if command -v yamllint >/dev/null 2>&1; then
 	yamllint -d '{extends: default, rules: {line-length: disable, truthy: disable}}' \
-		"$top/.github/workflows/publish.yml"
+		$workflows
 else
-	python3 - "$top/.github/workflows/publish.yml" <<'PY'
+	python3 - $workflows <<'PY'
 import sys
 import yaml
 
-with open(sys.argv[1], encoding="utf-8") as source:
-    yaml.load(source, Loader=yaml.BaseLoader)
+for path in sys.argv[1:]:
+    with open(path, encoding="utf-8") as source:
+        yaml.load(source, Loader=yaml.BaseLoader)
 PY
 fi
+
+grep -q '^  workflow_call:$' \
+	"$top/.github/workflows/release-packages.yml"
 
 jq -e '
     .organization == "chapeltech" and

@@ -1,0 +1,244 @@
+---
+name: Build and publish release packages
+
+on:
+  workflow_call:
+    inputs:
+      release_tag:
+        description: Existing release tag to receive package assets
+        required: true
+        type: string
+      packaging_ref:
+        description: Commit containing the packaging scripts to run
+        required: true
+        type: string
+    secrets:
+      ARCHIVE_SIGNING_KEY:
+        required: true
+      ARCHIVE_SIGNING_PASSPHRASE:
+        required: true
+      PKGS_DISPATCH_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-packages-${{ github.repository }}-${{ inputs.release_tag }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  RELEASE_TAG: ${{ inputs.release_tag }}
+
+jobs:
+  release:
+    name: Validate release
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check selected release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release view "$RELEASE_TAG"
+          --repo "$GITHUB_REPOSITORY" >/dev/null
+
+  debian:
+    name: Debian 13 (${{ matrix.architecture }})
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container: debian:trixie-slim
+    env:
+      ARTIFACT_DIR: ${{ github.workspace }}/artifacts
+      PACKAGING_DIR: ${{ github.workspace }}/packaging
+      SOURCE_DIR: ${{ github.workspace }}/source
+      TARGET_ARCHITECTURE: ${{ matrix.architecture }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Install checkout dependencies
+        run: |
+          apt-get update
+          apt-get install --no-install-recommends -y ca-certificates git
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.packaging_ref }}
+          path: packaging
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.release_tag }}
+          fetch-depth: 0
+          path: source
+      - name: Build Debian packages
+        run: "$PACKAGING_DIR/packaging/ci/build-debian"
+      - name: Validate Debian packages
+        run: |
+          mapfile -d '' packages < <(
+            find "$ARTIFACT_DIR" -maxdepth 1 -type f -name '*.deb' \
+              -print0 | sort -z
+          )
+          test "${#packages[@]}" -gt 0
+          for package in "${packages[@]}"; do
+            architecture=$(dpkg-deb -f "$package" Architecture)
+            case "$architecture" in
+              "$TARGET_ARCHITECTURE"|all) ;;
+              *)
+                echo "$package has unexpected architecture $architecture" >&2
+                exit 1
+                ;;
+            esac
+            dpkg-deb --info "$package" >/dev/null
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: debian-${{ matrix.architecture }}
+          path: artifacts/*.deb
+          if-no-files-found: error
+          retention-days: 1
+
+  rpm:
+    name: EL9 (x86_64)
+    needs: release
+    runs-on: ubuntu-24.04
+    container: rockylinux:9
+    env:
+      ARTIFACT_DIR: ${{ github.workspace }}/artifacts
+      PACKAGING_DIR: ${{ github.workspace }}/packaging
+      SOURCE_DIR: ${{ github.workspace }}/source
+      TARGET_ARCHITECTURE: x86_64
+      GH_TOKEN: ${{ github.token }}
+      GNUPGHOME: /tmp/archive-signing
+    steps:
+      - name: Install checkout and signing dependencies
+        run: dnf install -y ca-certificates git gnupg2 rpm-sign
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.packaging_ref }}
+          path: packaging
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.release_tag }}
+          fetch-depth: 0
+          path: source
+      - name: Build RPM packages
+        run: "$PACKAGING_DIR/packaging/ci/build-rpm"
+      - name: Validate RPM architectures
+        run: |
+          mapfile -d '' packages < <(
+            find "$ARTIFACT_DIR" -maxdepth 1 -type f -name '*.rpm' \
+              -print0 | sort -z
+          )
+          test "${#packages[@]}" -gt 0
+          for package in "${packages[@]}"; do
+            architecture=$(rpm -qp --qf '%{ARCH}' "$package")
+            case "$architecture" in
+              x86_64|noarch|src) ;;
+              *)
+                echo "$package has unexpected architecture $architecture" >&2
+                exit 1
+                ;;
+            esac
+          done
+      - name: Sign and verify RPM packages
+        env:
+          ARCHIVE_SIGNING_FINGERPRINT: ${{ vars.ARCHIVE_SIGNING_FINGERPRINT }}
+          ARCHIVE_SIGNING_KEY: ${{ secrets.ARCHIVE_SIGNING_KEY }}
+          ARCHIVE_SIGNING_PASSPHRASE: ${{ secrets.ARCHIVE_SIGNING_PASSPHRASE }}
+        run: |
+          test -n "$ARCHIVE_SIGNING_KEY"
+          test -n "$ARCHIVE_SIGNING_PASSPHRASE"
+          fingerprint=$(printf '%s' "$ARCHIVE_SIGNING_FINGERPRINT" |
+            tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
+          case "$fingerprint" in
+            ????????????????????????????????????????) ;;
+            *)
+              echo "ARCHIVE_SIGNING_FINGERPRINT must contain 40 hex digits" >&2
+              exit 1
+              ;;
+          esac
+          case "$fingerprint" in
+            *[!0-9A-F]*)
+              echo "ARCHIVE_SIGNING_FINGERPRINT must contain 40 hex digits" >&2
+              exit 1
+              ;;
+          esac
+
+          install -d -m 700 "$GNUPGHOME"
+          printf '%s' "$ARCHIVE_SIGNING_KEY" | gpg2 --batch --import
+          gpg2 --batch --with-colons --list-secret-keys "$fingerprint" |
+            awk -F: '$1 == "fpr" { print toupper($10) }' |
+            grep -Fx "$fingerprint"
+
+          passphrase_file=$GNUPGHOME/passphrase
+          public_key=$GNUPGHOME/public.asc
+          install -m 600 /dev/null "$passphrase_file"
+          printf '%s' "$ARCHIVE_SIGNING_PASSPHRASE" >"$passphrase_file"
+          gpg2 --batch --armor --export "$fingerprint" >"$public_key"
+          rpmkeys --import "$public_key"
+
+          mapfile -d '' packages < <(
+            find "$ARTIFACT_DIR" -maxdepth 1 -type f -name '*.rpm' \
+              -print0 | sort -z
+          )
+          for package in "${packages[@]}"; do
+            rpmsign --addsign \
+              --define "_gpg_name $fingerprint" \
+              --define "_gpg_path $GNUPGHOME" \
+              --define "_gpg_digest_algo sha256" \
+              --define "_gpg_sign_cmd_extra_args --batch --pinentry-mode loopback --passphrase-file $passphrase_file" \
+              "$package"
+            rpmkeys --checksig --verbose "$package" | tee /tmp/rpm-checksig
+            grep -Eq 'Signature.*, key ID [[:xdigit:]]+: OK' \
+              /tmp/rpm-checksig
+          done
+      - name: Remove signing key material
+        if: ${{ always() }}
+        run: rm -rf "$GNUPGHOME"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm-el9-x86_64
+          path: artifacts/*.rpm
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    name: Publish release assets
+    needs: [debian, rpm]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Upload packages to release
+        run: >-
+          gh release upload "$RELEASE_TAG" artifacts/*
+          --repo "$GITHUB_REPOSITORY" --clobber
+      - name: Dispatch package repository publication
+        env:
+          GH_TOKEN: ${{ secrets.PKGS_DISPATCH_TOKEN }}
+        run: |
+          test -n "$GH_TOKEN"
+          jq -n \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg tag "$RELEASE_TAG" \
+            '{event_type: "package-release", client_payload: {repository: $repository, tag: $tag}}' |
+            gh api --method POST repos/ChapelTech/pkgs/dispatches --input -

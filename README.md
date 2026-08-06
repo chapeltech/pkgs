@@ -22,6 +22,14 @@ Publication requires every stable latest release to contain `amd64` and
 `arm64` Debian packages and signed `x86_64` RPM packages. The fetch step fails
 closed while any of those release prerequisites are unavailable.
 
+This repository also owns the reusable package-release workflow used by each
+project. Producer repositories keep their package-specific commands in
+`packaging/ci/build-debian` and `packaging/ci/build-rpm`; their release workflow
+only selects a release tag and calls
+`.github/workflows/release-packages.yml` here. The shared workflow builds on
+native `amd64` and `arm64` runners, signs RPMs, uploads release assets, and
+dispatches repository publication.
+
 ## Build
 
 The build requires `apt-ftparchive`, `createrepo_c`, `curl`,
