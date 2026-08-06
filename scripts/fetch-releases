@@ -34,7 +34,7 @@ jq -r '.repositories[]' "$manifest" | while IFS= read -r repository; do
 	fi
 	mkdir -p "$dest/$repository/$tag"
 
-	jq -r '.assets[] | select(.name | test("\\.(deb|rpm)$")) |
+	jq -r '.assets[] | select(.name | test("\\.(apk|deb|rpm)$")) |
 	    [.name, .browser_download_url] | @tsv' "$release" |
 	while IFS='	' read -r name url; do
 		case "$name" in

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -eu
+
+destination=${1:?destination is required}
+source_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+work=/tmp/alpine-fixtures
+private_key=$destination/chapeltech-alpine.rsa
+
+rm -rf "$destination" "$work"
+mkdir -p "$destination" "$work"
+openssl genrsa -out "$private_key" 2048
+openssl rsa -in "$private_key" -pubout -out "$private_key.pub"
+install -m 644 "$private_key.pub" /etc/apk/keys/chapeltech-alpine.rsa.pub
+
+adduser -D builder
+addgroup builder abuild
+chown builder:builder "$private_key" "$private_key.pub" "$work"
+
+for package in prefork lnetd knc kharon krb5-admin krb5-keytab; do
+	build=$work/$package
+	mkdir "$build"
+	sed "s/@PACKAGE@/$package/" "$source_dir/APKBUILD.in" \
+		>"$build/APKBUILD"
+	chown -R builder:builder "$build"
+	su builder -c "cd '$build' && PACKAGER_PRIVKEY='$private_key' abuild -r"
+	done_package=$(find /home/builder/packages -type f \
+		-name "$package-1.0-r0.apk" -print -quit)
+	test -n "$done_package"
+	cp "$done_package" "$destination/"
+done

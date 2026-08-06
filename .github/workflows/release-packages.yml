@@ -13,6 +13,8 @@ on:
         required: true
         type: string
     secrets:
+      ALPINE_SIGNING_KEY:
+        required: true
       ARCHIVE_SIGNING_KEY:
         required: true
       ARCHIVE_SIGNING_PASSPHRASE:
@@ -215,9 +217,89 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  alpine:
+    name: Alpine 3.24 (${{ matrix.architecture }})
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: x86_64
+            runner: ubuntu-24.04
+          - architecture: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    env:
+      ARTIFACT_DIR: ${{ github.workspace }}/artifacts
+      PACKAGING_DIR: ${{ github.workspace }}/packaging
+      SOURCE_DIR: ${{ github.workspace }}/source
+      TARGET_ARCHITECTURE: ${{ matrix.architecture }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.packaging_ref }}
+          path: packaging
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.release_tag }}
+          fetch-depth: 0
+          path: source
+      - name: Build and verify Alpine packages
+        env:
+          ALPINE_SIGNING_KEY: ${{ secrets.ALPINE_SIGNING_KEY }}
+        run: |
+          test -n "$ALPINE_SIGNING_KEY"
+          private_key=$RUNNER_TEMP/chapeltech-alpine.rsa
+          public_key=$RUNNER_TEMP/chapeltech-alpine.rsa.pub
+          trap 'rm -f "$private_key" "$public_key"' EXIT HUP INT TERM
+          install -m 600 /dev/null "$private_key"
+          printf '%s' "$ALPINE_SIGNING_KEY" >"$private_key"
+          openssl rsa -in "$private_key" -pubout -out "$public_key"
+
+          mkdir -p "$ARTIFACT_DIR"
+          docker run --rm \
+            --env GH_TOKEN \
+            --env RELEASE_TAG \
+            --env TARGET_ARCHITECTURE \
+            --env ARTIFACT_DIR=/artifacts \
+            --env PACKAGING_DIR=/packaging \
+            --env SOURCE_DIR=/source \
+            --env PACKAGER_PRIVKEY=/run/secrets/chapeltech-alpine.rsa \
+            --env HOST_UID="$(id -u)" \
+            --env HOST_GID="$(id -g)" \
+            --volume "$ARTIFACT_DIR:/artifacts" \
+            --volume "$PACKAGING_DIR:/packaging:ro" \
+            --volume "$SOURCE_DIR:/source:ro" \
+            --volume "$private_key:/run/secrets/chapeltech-alpine.rsa:ro" \
+            --volume "$public_key:/run/secrets/chapeltech-alpine.rsa.pub:ro" \
+            alpine:3.24 sh -ec '
+              install -D -m 644 \
+                /run/secrets/chapeltech-alpine.rsa.pub \
+                /etc/apk/keys/chapeltech-alpine.rsa.pub
+              /packaging/packaging/ci/build-alpine
+              test "$(apk --print-arch)" = "$TARGET_ARCHITECTURE"
+              set -- /artifacts/*.apk
+              test -f "$1"
+              for package do
+                apk verify "$package"
+                mv "$package" \
+                  "${package%.apk}.$TARGET_ARCHITECTURE.apk"
+              done
+              chown -R "$HOST_UID:$HOST_GID" /artifacts
+            '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alpine-${{ matrix.architecture }}
+          path: artifacts/*.apk
+          if-no-files-found: error
+          retention-days: 1
+
   publish:
     name: Publish release assets
-    needs: [debian, rpm]
+    needs: [debian, rpm, alpine]
     runs-on: ubuntu-24.04
     permissions:
       contents: write

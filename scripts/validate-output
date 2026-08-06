@@ -17,8 +17,11 @@ test -s "$output/debian/dists/trixie/Release"
 test -s "$output/debian/dists/trixie/Release.gpg"
 test -s "$output/rpm/el9/x86_64/repodata/repomd.xml"
 test -s "$output/rpm/el9/x86_64/repodata/repomd.xml.asc"
+test -s "$output/alpine/v3.24/main/x86_64/APKINDEX.tar.gz"
+test -s "$output/alpine/v3.24/main/aarch64/APKINDEX.tar.gz"
 test -s "$output/keys/chapeltech-archive-keyring.gpg"
 test -s "$output/keys/chapeltech-archive-keyring.asc"
+test -s "$output/keys/chapeltech-alpine.rsa.pub"
 
 gpgv --keyring "$output/keys/chapeltech-archive-keyring.gpg" \
 	"$output/debian/dists/trixie/InRelease"
@@ -82,6 +85,19 @@ fi
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT HUP INT TERM
+
+for arch in x86_64 aarch64; do
+	mkdir -p "$work/apk-root-$arch"
+	apk --root "$work/apk-root-$arch" --arch "$arch" \
+		--usermode --initdb --no-network add
+	printf '%s\n' "$(realpath -- "$output/alpine/v3.24/main")" \
+		>"$work/repositories-$arch"
+	apk --root "$work/apk-root-$arch" --arch "$arch" \
+		--keys-dir "$(realpath -- "$output/keys")" \
+		--repositories-file "$work/repositories-$arch" \
+		--no-network update
+done
+
 gzip -cd "$1" >"$work/primary.xml"
 if grep -q 'legacy-' "$work/primary.xml"; then
 	echo "unsigned legacy RPM found in repository metadata" >&2
@@ -119,7 +135,8 @@ for repository in $(jq -r '.repositories[]' "$manifest"); do
 	    "$work/primary.xml"
 done
 
-if find "$output" \( -type l -o -type f \( -name '*.deb' -o -name '*.rpm' \) \) \
+if find "$output" \( -type l -o -type f \( -name '*.apk' -o \
+    -name '*.deb' -o -name '*.rpm' \) \) \
 	-print -quit | grep -q .; then
 	echo "package payload found in static output" >&2
 	exit 1
@@ -129,7 +146,65 @@ cat >"$work/redirects" <<'EOF'
 /debian/pool/github/* https://github.com/:splat 302
 /rpm/el9/x86_64/Packages/github/* https://github.com/:splat 302
 EOF
-cmp "$work/redirects" "$output/_redirects"
+head -n 2 "$output/_redirects" | cmp "$work/redirects" -
+tail -n +3 "$output/_redirects" >"$work/alpine-redirects"
+test -s "$work/alpine-redirects"
+sort -u "$work/alpine-redirects" >"$work/alpine-redirects.sorted"
+cmp "$work/alpine-redirects.sorted" "$work/alpine-redirects"
+
+while read -r route url status extra; do
+	if [ -z "$route" ] || [ -z "$url" ] || [ "$status" != 302 ] || \
+	    [ -n "$extra" ]; then
+		echo "invalid Alpine redirect: $route $url $status $extra" >&2
+		exit 1
+	fi
+	case "$route" in
+	/alpine/v3.24/main/x86_64/*.apk)
+		arch=x86_64
+		;;
+	/alpine/v3.24/main/aarch64/*.apk)
+		arch=aarch64
+		;;
+	*)
+		echo "invalid Alpine package route: $route" >&2
+		exit 1
+		;;
+	esac
+	case "$url" in
+	https://github.com/$organization/*/releases/download/*/*.$arch.apk)
+		;;
+	*)
+		echo "non-canonical Alpine payload URL: $url" >&2
+		exit 1
+		;;
+	esac
+	case "$url" in
+	*/latest/download/*)
+		echo "mutable Alpine payload URL: $url" >&2
+		exit 1
+		;;
+	esac
+	relative=${url#https://github.com/"$organization"/}
+	repository=${relative%%/*}
+	if ! jq -e --arg repository "$repository" \
+	    '.repositories | index($repository) != null' "$manifest" >/dev/null; then
+		echo "unconfigured Alpine payload repository: $repository" >&2
+		exit 1
+	fi
+	asset=${url##*/}
+	repository_name=${asset%."$arch".apk}.apk
+	if [ "$route" != "/alpine/v3.24/main/$arch/$repository_name" ]; then
+		echo "Alpine route does not match release asset: $route" >&2
+		exit 1
+	fi
+done <"$work/alpine-redirects"
+
+for repository in $(jq -r '.repositories[]' "$manifest"); do
+	for arch in x86_64 aarch64; do
+		grep -Eq "^/alpine/v3\\.24/main/$arch/[^ ]+ https://github\\.com/$organization/$repository/releases/download/[^/]+/[^/]+\\.$arch\\.apk 302$" \
+			"$work/alpine-redirects"
+	done
+done
 
 jq -e '
     .name == "aged-disk-d163" and

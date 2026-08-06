@@ -31,7 +31,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y \
-            apt-utils createrepo-c curl dpkg-dev gnupg jq rpm
+            apt-utils createrepo-c curl dpkg-dev gnupg jq openssl rpm
+          docker run --rm alpine:3.24 sh -ec \
+            'apk add --no-cache apk-tools-static >/dev/null; cat /sbin/apk.static' \
+            >/tmp/apk
+          sudo install -m 755 /tmp/apk /usr/local/bin/apk
+          rm -f /tmp/apk
 
       - name: Import archive signing subkey
         env:
@@ -50,6 +55,7 @@ jobs:
 
       - name: Build and validate repositories
         env:
+          ALPINE_SIGNING_KEY: ${{ secrets.ALPINE_SIGNING_KEY }}
           ARCHIVE_SIGNING_SUBKEY_FINGERPRINT: ${{ vars.ARCHIVE_SIGNING_SUBKEY_FINGERPRINT }}
           ARCHIVE_SIGNING_PASSPHRASE: ${{ secrets.ARCHIVE_SIGNING_PASSPHRASE }}
         run: |

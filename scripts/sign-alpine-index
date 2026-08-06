@@ -1,0 +1,47 @@
+#!/bin/sh
+
+set -eu
+
+if [ "$#" -lt 3 ]; then
+	echo "usage: $0 private-key public-key-name index [...]" >&2
+	exit 2
+fi
+
+private_key=$1
+public_name=${2##*/}
+shift 2
+
+test -s "$private_key"
+case "$public_name" in
+''|.|..|*/*)
+	echo "invalid Alpine public key name: $public_name" >&2
+	exit 2
+	;;
+esac
+
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT HUP INT TERM
+
+for index do
+	test -f "$index"
+	directory=$(dirname -- "$index")
+	filename=$(basename -- "$index")
+	signature=.SIGN.RSA256.$public_name
+	unsigned=$(realpath -- "$index")
+
+	rm -rf "$work/signature"
+	mkdir "$work/signature"
+	openssl dgst -sha256 -sign "$private_key" \
+		-out "$work/signature/$signature" "$unsigned"
+
+	tar -C "$work/signature" --format=ustar --blocking-factor=1 \
+		--owner=0 --group=0 --numeric-owner -cf "$work/signature.tar" \
+		"$signature"
+	size=$(wc -c <"$work/signature.tar")
+	test "$size" -ge 1536
+	dd if="$work/signature.tar" bs=1 count="$((size - 1024))" \
+		status=none | gzip -n -9 >"$work/signed"
+	cat "$unsigned" >>"$work/signed"
+	chmod 644 "$work/signed"
+	mv "$work/signed" "$directory/$filename"
+done

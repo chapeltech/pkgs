@@ -15,14 +15,14 @@ if command -v shellcheck >/dev/null 2>&1; then
 		"$top"/tests/static
 fi
 
-workflows="$top/.github/workflows/publish.yml
-$top/.github/workflows/release-packages.yml"
+set -- "$top/.github/workflows/publish.yml" \
+	"$top/.github/workflows/release-packages.yml"
 
 if command -v yamllint >/dev/null 2>&1; then
 	yamllint -d '{extends: default, rules: {line-length: disable, truthy: disable}}' \
-		$workflows
+		"$@"
 else
-	python3 - $workflows <<'PY'
+	python3 - "$@" <<'PY'
 import sys
 import yaml
 

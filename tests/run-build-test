@@ -12,6 +12,9 @@ rpmtop=$work/rpmbuild
 rpmdb=$work/rpmdb
 tag=v-test
 
+ALPINE_SIGNING_KEY=$(cat /alpine-fixtures/chapeltech-alpine.rsa)
+export ALPINE_SIGNING_KEY
+
 mkdir -m 700 "$full_gnupg"
 export GNUPGHOME="$full_gnupg"
 gpg --batch --pinentry-mode loopback --passphrase "$passphrase" \
@@ -101,7 +104,18 @@ EOF
 	cp "$rpm_path" "$artifacts/$repository/$tag/$rpm_name"
 	url=https://github.com/chapeltech/$repository/releases/download/$tag/$rpm_name
 	printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$rpm_name" "$url" \
-		>>"$artifacts/releases.tsv"
+			>>"$artifacts/releases.tsv"
+
+	apk_source=$(find /alpine-fixtures -type f \
+		-name "$package-1.0-r0.apk" -print -quit)
+	test -n "$apk_source"
+	for arch in x86_64 aarch64; do
+		apk_name=$package-1.0-r0.$arch.apk
+		cp "$apk_source" "$artifacts/$repository/$tag/$apk_name"
+		url=https://github.com/chapeltech/$repository/releases/download/$tag/$apk_name
+		printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$apk_name" "$url" \
+			>>"$artifacts/releases.tsv"
+	done
 done
 
 gpg --batch --pinentry-mode loopback --passphrase "$passphrase" \

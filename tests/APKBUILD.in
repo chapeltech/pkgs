@@ -1,0 +1,13 @@
+pkgname=@PACKAGE@
+pkgver=1.0
+pkgrel=0
+pkgdesc="Synthetic ChapelTech repository test package"
+url="https://repo.chapeltech.uk"
+arch="noarch"
+license="MIT"
+options="!check"
+
+package() {
+	install -Dm644 /dev/null \
+		"$pkgdir/usr/share/$pkgname/repository-test"
+}

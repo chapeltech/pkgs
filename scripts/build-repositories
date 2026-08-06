@@ -14,6 +14,7 @@ manifest=$top/packages.json
 organization=$(jq -er .organization "$manifest")
 fingerprint=${ARCHIVE_SIGNING_SUBKEY_FINGERPRINT:?ARCHIVE_SIGNING_SUBKEY_FINGERPRINT is required}
 passphrase=${ARCHIVE_SIGNING_PASSPHRASE:?ARCHIVE_SIGNING_PASSPHRASE is required}
+alpine_key=${ALPINE_SIGNING_KEY:?ALPINE_SIGNING_KEY is required}
 
 "$top/scripts/check-signing-key"
 
@@ -22,17 +23,24 @@ trap 'rm -rf "$work"' EXIT HUP INT TERM
 printf '%s' "$passphrase" >"$work/passphrase"
 chmod 600 "$work/passphrase"
 mkdir -p "$work/seen"
+printf '%s' "$alpine_key" >"$work/chapeltech-alpine.rsa"
+chmod 600 "$work/chapeltech-alpine.rsa"
+: >"$work/alpine-redirects"
 
 rm -rf "$output"
 mkdir -p "$output/keys" \
 	"$output/debian/dists/trixie/main/binary-amd64" \
 	"$output/debian/dists/trixie/main/binary-arm64" \
+	"$output/alpine/v3.24/main/x86_64" \
+	"$output/alpine/v3.24/main/aarch64" \
 	"$output/rpm/el9/x86_64/Packages"
 
 gpg --batch --export "$fingerprint" \
 	>"$output/keys/chapeltech-archive-keyring.gpg"
 gpg --batch --armor --export "$fingerprint" \
 	>"$output/keys/chapeltech-archive-keyring.asc"
+openssl rsa -in "$work/chapeltech-alpine.rsa" -pubout \
+	-out "$output/keys/chapeltech-alpine.rsa.pub"
 
 rpmdb=$work/rpmdb
 rpm --define "_dbpath $rpmdb" --initdb
@@ -111,6 +119,36 @@ while IFS='	' read -r repository tag name url extra; do
 		touch "$work/seen/$repository-rpm-$arch"
 		destination=$output/rpm/el9/x86_64/Packages/github/$organization/$repository/releases/download/$tag/$name
 		;;
+	*.apk)
+		case "$name" in
+		*.x86_64.apk)
+			alpine_arches=x86_64
+			repository_name=${name%.x86_64.apk}.apk
+			;;
+		*.aarch64.apk)
+			alpine_arches=aarch64
+			repository_name=${name%.aarch64.apk}.apk
+			;;
+		*)
+			echo "ignoring unsupported Alpine architecture: $name" >&2
+			continue
+			;;
+		esac
+		apk --keys-dir "$(realpath -- "$output/keys")" verify "$source"
+		for arch in $alpine_arches; do
+			touch "$work/seen/$repository-apk-$arch"
+			destination=$output/alpine/v3.24/main/$arch/$repository_name
+			if [ -e "$destination" ] || [ -L "$destination" ]; then
+				echo "duplicate Alpine package filename: $repository_name" >&2
+				exit 1
+			fi
+			ln -s "$(realpath -- "$source")" "$destination"
+			printf '/alpine/v3.24/main/%s/%s %s 302\n' \
+				"$arch" "$repository_name" "$url" \
+				>>"$work/alpine-redirects"
+		done
+		continue
+		;;
 	*)
 		continue
 		;;
@@ -130,6 +168,12 @@ for repository in $(jq -r '.repositories[]' "$manifest"); do
 		echo "missing signed EL9 packages for $repository" >&2
 		exit 1
 	}
+	for arch in x86_64 aarch64; do
+		test -f "$work/seen/$repository-apk-$arch" || {
+			echo "missing $arch Alpine packages for $repository" >&2
+			exit 1
+		}
+	done
 done
 
 (
@@ -166,12 +210,23 @@ gpg --batch --yes --pinentry-mode loopback \
 	--output "$output/rpm/el9/x86_64/repodata/repomd.xml.asc" \
 	"$output/rpm/el9/x86_64/repodata/repomd.xml"
 
+for arch in x86_64 aarch64; do
+	directory=$output/alpine/v3.24/main/$arch
+	apk --keys-dir "$(realpath -- "$output/keys")" index --no-warnings \
+		--description 'ChapelTech packages for Alpine 3.24' \
+		--output "$directory/APKINDEX.tar.gz" "$directory"/*.apk
+	"$top/scripts/sign-alpine-index" "$work/chapeltech-alpine.rsa" \
+		chapeltech-alpine.rsa.pub "$directory/APKINDEX.tar.gz"
+done
+
 rm -rf "$output/debian/pool" "$output/rpm/el9/x86_64/Packages"
+find "$output/alpine" -type l -name '*.apk' -delete
 
 cat >"$output/_redirects" <<'EOF'
 /debian/pool/github/* https://github.com/:splat 302
 /rpm/el9/x86_64/Packages/github/* https://github.com/:splat 302
 EOF
+sort -u "$work/alpine-redirects" >>"$output/_redirects"
 
 cat >"$output/wrangler.jsonc" <<'EOF'
 {
@@ -209,6 +264,10 @@ repo_gpgcheck=1
 gpgkey=https://repo.chapeltech.uk/keys/chapeltech-archive-keyring.asc
 EOF
 
+cat >"$output/config/chapeltech-alpine.repositories" <<'EOF'
+https://repo.chapeltech.uk/alpine/v3.24/main
+EOF
+
 cat >"$output/index.html" <<'EOF'
 <!doctype html>
 <html lang="en">
@@ -217,11 +276,14 @@ cat >"$output/index.html" <<'EOF'
 <h1>ChapelTech packages</h1>
 <p>Debian 13 packages are available for amd64 and arm64.</p>
 <p>EL9 packages are available for x86_64.</p>
+<p>Alpine 3.24 packages are available for x86_64 and aarch64.</p>
 <ul>
 <li><a href="/config/chapeltech.sources">APT source configuration</a></li>
 <li><a href="/config/chapeltech.repo">DNF repository configuration</a></li>
+<li><a href="/config/chapeltech-alpine.repositories">APK repository configuration</a></li>
 <li><a href="/keys/chapeltech-archive-keyring.gpg">APT archive key</a></li>
 <li><a href="/keys/chapeltech-archive-keyring.asc">ASCII-armored archive key</a></li>
+<li><a href="/keys/chapeltech-alpine.rsa.pub">APK repository key</a></li>
 </ul>
 </body>
 </html>

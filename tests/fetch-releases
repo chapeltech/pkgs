@@ -83,6 +83,14 @@ cat >"$release_dir/$repository.json" <<EOF
     {
       "name": "${repository}-1.0-1.el9.src.rpm",
       "browser_download_url": "https://github.com/chapeltech/$repository/releases/download/v-test/${repository}-1.0-1.el9.src.rpm"
+    },
+    {
+      "name": "${repository}-1.0-r0.x86_64.apk",
+      "browser_download_url": "https://github.com/chapeltech/$repository/releases/download/v-test/${repository}-1.0-r0.x86_64.apk"
+    },
+    {
+      "name": "${repository}-1.0-r0.aarch64.apk",
+      "browser_download_url": "https://github.com/chapeltech/$repository/releases/download/v-test/${repository}-1.0-r0.aarch64.apk"
     }
   ]
 }
@@ -91,12 +99,12 @@ done
 
 "$top/scripts/fetch-releases" "$work/artifacts"
 repository_count=$(jq '.repositories | length' "$top/packages.json")
-test "$(wc -l <"$work/artifacts/releases.tsv")" -eq "$((repository_count * 3))"
-test "$(wc -l <"$downloads")" -eq "$((repository_count * 3))"
+test "$(wc -l <"$work/artifacts/releases.tsv")" -eq "$((repository_count * 5))"
+test "$(wc -l <"$downloads")" -eq "$((repository_count * 5))"
 for repository in $(jq -r '.repositories[]' "$top/packages.json"); do
 	test "$(awk -F '\t' -v repository="$repository" \
 	    '$1 == repository && $2 == "v-test" { count++ } END { print count + 0 }' \
-	    "$work/artifacts/releases.tsv")" -eq 3
+	    "$work/artifacts/releases.tsv")" -eq 5
 done
 
 jq '.prerelease = true' "$release_dir/prefork.json" \
