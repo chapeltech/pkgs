@@ -23,9 +23,9 @@ Publication requires every stable latest release to contain `amd64` and
 closed while any of those release prerequisites are unavailable.
 
 This repository also owns the reusable package-release workflow used by each
-project. Producer repositories keep their package-specific commands in
-`packaging/ci/build-debian` and `packaging/ci/build-rpm`; their release workflow
-only selects a release tag and calls
+project. It provides both selected-release source and current packaging to the
+package-specific commands in `packaging/ci/build-debian` and
+`packaging/ci/build-rpm`; their release workflow only selects a release tag and calls
 `.github/workflows/release-packages.yml` here. The shared workflow builds on
 native `amd64` and `arm64` runners, signs RPMs, uploads release assets, and
 dispatches repository publication.
