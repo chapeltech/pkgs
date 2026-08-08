@@ -1,31 +1,31 @@
 Architectures: amd64 arm64
 Codename: trixie
 Components: main
-Date: Fri, 07 Aug 2026 05:03:14 +0000
+Date: Sat, 08 Aug 2026 04:23:17 +0000
 Description: ChapelTech packages for Debian 13
 Label: ChapelTech
 Origin: ChapelTech
 Suite: trixie
 MD5Sum:
- 5e53353a54bdd32171c6c4e93218a73b              197 Release
+ f944b3dba54ee5d90fa711cb682c9529              197 Release
  341f68f98b2cf6ee03c633a3937a03be             9740 main/binary-amd64/Packages
  6f11073522bc70f410475689de7c981e             3167 main/binary-amd64/Packages.gz
  63c753710eaba1f487488e4463fd833a             9743 main/binary-arm64/Packages
  842c85ec135609bf04097223cd19a41f             3165 main/binary-arm64/Packages.gz
 SHA1:
- 884fdef7ff69b3f93a8c4b55249784e9cb738dc9              197 Release
+ 5c5f1ff6126a636798ee3c8313cd3ccf59dde000              197 Release
  5c4a46b47a162c05adf51f32cf6ed33b77d601f9             9740 main/binary-amd64/Packages
  6544f60291008ae85ebf81c3ca5f7a0bbe55e3e3             3167 main/binary-amd64/Packages.gz
  2189c1926dd39d494770b48ff5f1855893ea47d8             9743 main/binary-arm64/Packages
  8a98eaca51f92a9ae79dc9d93c3090da00855a70             3165 main/binary-arm64/Packages.gz
 SHA256:
- 19ad2e4e830dfaa8f350d461bc3966f01add5ccb75b6652efe36521ccb0d4d04              197 Release
+ 492cccb3aa646c31050f809ed0b57386875e84faad33f5a13fa1267a4dfb8bae              197 Release
  6e2bb21ac49e3782f50f4ad2d44a87dd31173109717f7860f45bcdb859f7e861             9740 main/binary-amd64/Packages
  e676b850503e560c5e16f82bdeb6376f60ee74869b0837ef7116ae5ad9bb8901             3167 main/binary-amd64/Packages.gz
  f465c847741abca882ead63792cb47b519316995f04a18e2da0d459c0109ac40             9743 main/binary-arm64/Packages
  31362bd869ee652f32e085729e90c42c36d201f86f268b3a27942a9c77842b07             3165 main/binary-arm64/Packages.gz
 SHA512:
- 586d369364731142be6d76e6ce55b22e765cb5e36764e571b9b66e4267394072d41ff83bd5e85f5ca0a5e3dadf5ebc867e9b387d32827b062a2026f7c420f258              197 Release
+ c71bfcaee5d9ff22d61a2fc1befb9241fdbcd773191e4a4fbf8c12fdf28e495633f70001eb1a81896869d33f3037040335bd0900990c14f8e0db7e59429664da              197 Release
  8049eda68baaf2ba7ecda1a0704641c97a5906c8fdb5d2f02d208fd3febd7a5ffc4b4e60bb0847e7ab9d4c2f541d269f0ff7fb60a60af46fd9a73a93c933e3b2             9740 main/binary-amd64/Packages
  ec2b1d9dcbf3a76fe507842ae3c889af161ed96f879232850eb5e3ea8de67e25502bce13f05201ef58f88955bba9d6c77eafb74dc971c0494b86f9e398f316d7             3167 main/binary-amd64/Packages.gz
  150baab0879ec2646ad29ea11402ee2a0e0d7cb46d4a56822523e2b74e79b60b1fbb99c7e233b63b4c78fcc6f1aec8ccfabaaebedc0dea3ee054888424c1f1e5             9743 main/binary-arm64/Packages
