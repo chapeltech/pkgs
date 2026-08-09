@@ -21,4 +21,5 @@ fi
 "$engine" run --rm --security-opt label=disable \
 	--user "$(id -u):$(id -g)" \
 	-e HOME=/tmp -v "$top:/src" -w /src "$image" \
-	sh -c 'tests/static && tests/fetch-releases && tests/run-build-test'
+	sh -c 'tests/static && tests/fetch-releases && \
+	    tests/publish-alpine-release && tests/run-build-test'

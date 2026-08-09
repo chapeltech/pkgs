@@ -48,8 +48,22 @@ jq -e '
 ' "$top/packages.json" >/dev/null
 
 git -C "$top" check-ignore -q artifacts/example
+git -C "$top" check-ignore -q alpine-release/example
+git -C "$top" check-ignore -q alpine-release-test/example
 git -C "$top" check-ignore -q public/example
 git -C "$top" check-ignore -q public-test/example
+
+expected=$(mktemp)
+trap 'rm -f "$expected"' EXIT HUP INT TERM
+cat >"$expected" <<'EOF'
+/debian/pool/github/* https://github.com/:splat 302!
+/rpm/el9/x86_64/Packages/github/* https://github.com/:splat 302!
+/alpine/v3.24/main/aarch64/* https://github.com/chapeltech/pkgs/releases/latest/download/alpine-aarch64-:splat 302!
+/alpine/v3.24/main/x86_64/* https://github.com/chapeltech/pkgs/releases/latest/download/alpine-x86_64-:splat 302!
+/ https://raw.githubusercontent.com/chapeltech/pkgs/repository/index.html 302!
+/* https://raw.githubusercontent.com/chapeltech/pkgs/repository/:splat 302!
+EOF
+cmp "$expected" "$top/netlify/_redirects"
 
 marker='BEGIN PGP PRIVATE KEY'' BLOCK'
 matches=$(find "$top" \

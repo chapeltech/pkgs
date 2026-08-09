@@ -2,13 +2,14 @@
 
 set -eu
 
-if [ "$#" -gt 2 ]; then
-	echo "usage: $0 [artifacts] [output]" >&2
+if [ "$#" -gt 3 ]; then
+	echo "usage: $0 [artifacts] [output] [alpine-release]" >&2
 	exit 2
 fi
 
 artifacts=${1:-artifacts}
 output=${2:-public}
+alpine_release=${3:-alpine-release}
 top=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 manifest=$top/packages.json
 organization=$(jq -er .organization "$manifest")
@@ -25,15 +26,14 @@ chmod 600 "$work/passphrase"
 mkdir -p "$work/seen"
 printf '%s' "$alpine_key" >"$work/chapeltech-alpine.rsa"
 chmod 600 "$work/chapeltech-alpine.rsa"
-: >"$work/alpine-redirects"
 
-rm -rf "$output"
+rm -rf "$output" "$alpine_release"
 mkdir -p "$output/keys" \
 	"$output/debian/dists/trixie/main/binary-amd64" \
 	"$output/debian/dists/trixie/main/binary-arm64" \
 	"$output/alpine/v3.24/main/x86_64" \
 	"$output/alpine/v3.24/main/aarch64" \
-	"$output/rpm/el9/x86_64/Packages"
+	"$output/rpm/el9/x86_64/Packages" "$alpine_release"
 
 gpg --batch --export "$fingerprint" \
 	>"$output/keys/chapeltech-archive-keyring.gpg"
@@ -143,9 +143,6 @@ while IFS='	' read -r repository tag name url extra; do
 				exit 1
 			fi
 			ln -s "$(realpath -- "$source")" "$destination"
-			printf '/alpine/v3.24/main/%s/%s %s 302\n' \
-				"$arch" "$repository_name" "$url" \
-				>>"$work/alpine-redirects"
 		done
 		continue
 		;;
@@ -217,33 +214,16 @@ for arch in x86_64 aarch64; do
 		--output "$directory/APKINDEX.tar.gz" "$directory"/*.apk
 	"$top/scripts/sign-alpine-index" "$work/chapeltech-alpine.rsa" \
 		chapeltech-alpine.rsa.pub "$directory/APKINDEX.tar.gz"
+	cp "$directory/APKINDEX.tar.gz" \
+		"$alpine_release/alpine-$arch-APKINDEX.tar.gz"
+	for package in "$directory"/*.apk; do
+		cp -L "$package" \
+			"$alpine_release/alpine-$arch-$(basename -- "$package")"
+	done
 done
 
 rm -rf "$output/debian/pool" "$output/rpm/el9/x86_64/Packages"
 find "$output/alpine" -type l -name '*.apk' -delete
-
-cat >"$output/_redirects" <<'EOF'
-/debian/pool/github/* https://github.com/:splat 302
-/rpm/el9/x86_64/Packages/github/* https://github.com/:splat 302
-EOF
-sort -u "$work/alpine-redirects" >>"$output/_redirects"
-
-cat >"$output/wrangler.jsonc" <<'EOF'
-{
-  "name": "aged-disk-d163",
-  "compatibility_date": "2026-08-06",
-  "assets": {
-    "directory": ".",
-    "html_handling": "none"
-  }
-}
-EOF
-
-cat >"$output/.assetsignore" <<'EOF'
-wrangler.jsonc
-.assetsignore
-.wrangler
-EOF
 
 mkdir -p "$output/config"
 cat >"$output/config/chapeltech.sources" <<'EOF'

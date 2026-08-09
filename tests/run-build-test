@@ -126,5 +126,5 @@ export GNUPGHOME="$signing_gnupg"
 gpg --batch --import "$work/archive-signing-subkey.asc" >/dev/null
 
 scripts/check-signing-key
-scripts/build-repositories "$artifacts" public-test
-scripts/validate-output public-test
+scripts/build-repositories "$artifacts" public-test "$work/alpine-release"
+scripts/validate-output public-test "$work/alpine-release"

@@ -1,0 +1,53 @@
+#!/bin/sh
+
+set -eu
+
+if [ "$#" -gt 1 ]; then
+	echo "usage: $0 [alpine-release]" >&2
+	exit 2
+fi
+
+assets=${1:-alpine-release}
+repository=${GITHUB_REPOSITORY:-chapeltech/pkgs}
+target=${GITHUB_SHA:-master}
+
+case "$repository" in
+chapeltech/pkgs|ChapelTech/pkgs)
+	;;
+*)
+	echo "refusing to publish Alpine repository assets to $repository" >&2
+	exit 1
+	;;
+esac
+
+test -s "$assets/alpine-aarch64-APKINDEX.tar.gz"
+test -s "$assets/alpine-x86_64-APKINDEX.tar.gz"
+
+set -- "$assets"/*
+if [ "$#" -gt 1000 ]; then
+	echo "Alpine repository snapshot contains more than 1000 assets" >&2
+	exit 1
+fi
+for asset do
+	test -f "$asset"
+	case "$(basename -- "$asset")" in
+	alpine-aarch64-*|alpine-x86_64-*)
+		;;
+	*)
+		echo "invalid Alpine repository asset: $asset" >&2
+		exit 1
+		;;
+	esac
+done
+
+tag=repository-$(date -u +%Y%m%dT%H%M%SZ)
+if [ -n "${GITHUB_RUN_ID:-}" ]; then
+	tag=$tag-$GITHUB_RUN_ID
+fi
+
+gh release create "$tag" "$assets"/* \
+	--repo "$repository" \
+	--target "$target" \
+	--title "Alpine repository snapshot $tag" \
+	--notes 'Signed Alpine 3.24 repository snapshot for repo.chapeltech.uk.' \
+	--latest

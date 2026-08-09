@@ -2,22 +2,29 @@
 
 set -eu
 
-if [ "$#" -gt 1 ]; then
-	echo "usage: $0 [output]" >&2
+if [ "$#" -gt 2 ]; then
+	echo "usage: $0 [output] [branch]" >&2
 	exit 2
 fi
 
 output=$(realpath -- "${1:-public}")
+branch=${2:-repository}
+case "$branch" in
+''|.|..|*/*)
+	echo "invalid publication branch: $branch" >&2
+	exit 2
+	;;
+esac
 worktree=$(mktemp -d)
 trap 'git worktree remove --force "$worktree" >/dev/null 2>&1 || true' EXIT HUP INT TERM
 
-if git show-ref --verify --quiet refs/remotes/origin/published; then
-	git worktree add -B published "$worktree" origin/published
+if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+	git worktree add -B "$branch" "$worktree" "origin/$branch"
 else
 	git worktree add --detach "$worktree"
 	(
 		cd "$worktree"
-		git switch --orphan published
+		git switch --orphan "$branch"
 		git rm -rf --ignore-unmatch .
 	)
 fi
@@ -32,5 +39,5 @@ cp -a "$output/." "$worktree/"
 		exit 0
 	fi
 	git commit -m 'Publish package repository metadata'
-	git push origin HEAD:published
+	git push origin "HEAD:$branch"
 )

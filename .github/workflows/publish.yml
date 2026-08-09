@@ -5,8 +5,6 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types: [package-release]
-  schedule:
-    - cron: '17 3 * * *'
 
 permissions:
   contents: write
@@ -59,15 +57,20 @@ jobs:
           ARCHIVE_SIGNING_SUBKEY_FINGERPRINT: ${{ vars.ARCHIVE_SIGNING_SUBKEY_FINGERPRINT }}
           ARCHIVE_SIGNING_PASSPHRASE: ${{ secrets.ARCHIVE_SIGNING_PASSPHRASE }}
         run: |
-          scripts/build-repositories artifacts public
-          scripts/validate-output public
+          scripts/build-repositories artifacts public alpine-release
+          scripts/validate-output public alpine-release
 
       - name: Remove signing key material
         if: ${{ always() }}
         run: rm -rf "$GNUPGHOME"
 
+      - name: Publish Alpine repository snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/publish-alpine-release alpine-release
+
       - name: Publish generated branch
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          scripts/publish-branch public
+          scripts/publish-branch public repository

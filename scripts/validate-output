@@ -2,12 +2,13 @@
 
 set -eu
 
-if [ "$#" -gt 1 ]; then
-	echo "usage: $0 [output]" >&2
+if [ "$#" -gt 2 ]; then
+	echo "usage: $0 [output] [alpine-release]" >&2
 	exit 2
 fi
 
 output=${1:-public}
+alpine_release=${2:-alpine-release}
 top=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 manifest=$top/packages.json
 organization=$(jq -er .organization "$manifest")
@@ -96,6 +97,43 @@ for arch in x86_64 aarch64; do
 		--keys-dir "$(realpath -- "$output/keys")" \
 		--repositories-file "$work/repositories-$arch" \
 		--no-network update
+
+	prefix=alpine-$arch-
+	index=$alpine_release/${prefix}APKINDEX.tar.gz
+	test -s "$index"
+	cmp "$output/alpine/v3.24/main/$arch/APKINDEX.tar.gz" "$index"
+	first=$(find "$alpine_release" -maxdepth 1 -type f \
+		-name "$prefix*.apk" -print -quit)
+	test -n "$first"
+
+	expected=$work/alpine-assets-$arch
+	tar -xOzf "$index" APKINDEX |
+	awk -F: '
+	    $1 == "P" { package = $2 }
+	    $1 == "V" { version = $2 }
+	    NF == 0 && package != "" && version != "" {
+	        print package "-" version ".apk"
+	        package = version = ""
+	    }
+	    END {
+	        if (package != "" && version != "")
+	            print package "-" version ".apk"
+	    }
+	' | sort -u >"$expected"
+	test -s "$expected"
+
+	while IFS= read -r package; do
+		asset=$alpine_release/$prefix$package
+		test -s "$asset"
+		apk --keys-dir "$(realpath -- "$output/keys")" verify "$asset"
+	done <"$expected"
+
+	find "$alpine_release" -maxdepth 1 -type f \
+		-name "$prefix*.apk" -print |
+	while IFS= read -r asset; do
+		package=${asset##*/"$prefix"}
+		grep -Fx "$package" "$expected" >/dev/null
+	done
 done
 
 gzip -cd "$1" >"$work/primary.xml"
@@ -142,80 +180,6 @@ if find "$output" \( -type l -o -type f \( -name '*.apk' -o \
 	exit 1
 fi
 
-cat >"$work/redirects" <<'EOF'
-/debian/pool/github/* https://github.com/:splat 302
-/rpm/el9/x86_64/Packages/github/* https://github.com/:splat 302
-EOF
-head -n 2 "$output/_redirects" | cmp "$work/redirects" -
-tail -n +3 "$output/_redirects" >"$work/alpine-redirects"
-test -s "$work/alpine-redirects"
-sort -u "$work/alpine-redirects" >"$work/alpine-redirects.sorted"
-cmp "$work/alpine-redirects.sorted" "$work/alpine-redirects"
-
-while read -r route url status extra; do
-	if [ -z "$route" ] || [ -z "$url" ] || [ "$status" != 302 ] || \
-	    [ -n "$extra" ]; then
-		echo "invalid Alpine redirect: $route $url $status $extra" >&2
-		exit 1
-	fi
-	case "$route" in
-	/alpine/v3.24/main/x86_64/*.apk)
-		arch=x86_64
-		;;
-	/alpine/v3.24/main/aarch64/*.apk)
-		arch=aarch64
-		;;
-	*)
-		echo "invalid Alpine package route: $route" >&2
-		exit 1
-		;;
-	esac
-	case "$url" in
-	https://github.com/$organization/*/releases/download/*/*.$arch.apk)
-		;;
-	*)
-		echo "non-canonical Alpine payload URL: $url" >&2
-		exit 1
-		;;
-	esac
-	case "$url" in
-	*/latest/download/*)
-		echo "mutable Alpine payload URL: $url" >&2
-		exit 1
-		;;
-	esac
-	relative=${url#https://github.com/"$organization"/}
-	repository=${relative%%/*}
-	if ! jq -e --arg repository "$repository" \
-	    '.repositories | index($repository) != null' "$manifest" >/dev/null; then
-		echo "unconfigured Alpine payload repository: $repository" >&2
-		exit 1
-	fi
-	asset=${url##*/}
-	repository_name=${asset%."$arch".apk}.apk
-	if [ "$route" != "/alpine/v3.24/main/$arch/$repository_name" ]; then
-		echo "Alpine route does not match release asset: $route" >&2
-		exit 1
-	fi
-done <"$work/alpine-redirects"
-
-for repository in $(jq -r '.repositories[]' "$manifest"); do
-	for arch in x86_64 aarch64; do
-		grep -Eq "^/alpine/v3\\.24/main/$arch/[^ ]+ https://github\\.com/$organization/$repository/releases/download/[^/]+/[^/]+\\.$arch\\.apk 302$" \
-			"$work/alpine-redirects"
-	done
+for netlify_file in _redirects wrangler.jsonc .assetsignore; do
+	test ! -e "$output/$netlify_file"
 done
-
-jq -e '
-    .name == "aged-disk-d163" and
-    .compatibility_date == "2026-08-06" and
-    .assets.directory == "." and
-    .assets.html_handling == "none"
-' "$output/wrangler.jsonc" >/dev/null
-
-cat >"$work/assetsignore" <<'EOF'
-wrangler.jsonc
-.assetsignore
-.wrangler
-EOF
-cmp "$work/assetsignore" "$output/.assetsignore"

@@ -1,0 +1,48 @@
+#!/bin/sh
+
+set -eu
+
+top=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT HUP INT TERM
+mkdir -p "$work/assets" "$work/bin"
+
+for arch in aarch64 x86_64; do
+	printf '%s\n' index >"$work/assets/alpine-$arch-APKINDEX.tar.gz"
+	printf '%s\n' package >"$work/assets/alpine-$arch-example-1.0-r0.apk"
+done
+
+cat >"$work/bin/gh" <<'EOF'
+#!/bin/sh
+printf '%s\n' "$@" >"$MOCK_GH_ARGS"
+EOF
+chmod 755 "$work/bin/gh"
+
+MOCK_GH_ARGS=$work/gh-args
+GITHUB_REPOSITORY=chapeltech/pkgs
+GITHUB_RUN_ID=1234
+GITHUB_SHA=0123456789abcdef0123456789abcdef01234567
+PATH=$work/bin:$PATH
+export MOCK_GH_ARGS GITHUB_REPOSITORY GITHUB_RUN_ID GITHUB_SHA PATH
+
+"$top/scripts/publish-alpine-release" "$work/assets"
+
+sed -n '1p' "$MOCK_GH_ARGS" | grep -qx release
+sed -n '2p' "$MOCK_GH_ARGS" | grep -qx create
+sed -n '3p' "$MOCK_GH_ARGS" |
+	grep -Eq '^repository-[0-9]{8}T[0-9]{6}Z-1234$'
+grep -Fx -- '--repo' "$MOCK_GH_ARGS" >/dev/null
+grep -Fx chapeltech/pkgs "$MOCK_GH_ARGS" >/dev/null
+grep -Fx -- '--target' "$MOCK_GH_ARGS" >/dev/null
+grep -Fx "$GITHUB_SHA" "$MOCK_GH_ARGS" >/dev/null
+grep -Fx -- '--latest' "$MOCK_GH_ARGS" >/dev/null
+
+for asset in "$work/assets"/*; do
+	grep -Fx "$asset" "$MOCK_GH_ARGS" >/dev/null
+done
+
+if GITHUB_REPOSITORY=chapeltech/not-pkgs \
+    "$top/scripts/publish-alpine-release" "$work/assets" >/dev/null 2>&1; then
+	echo "unexpected repository was accepted" >&2
+	exit 1
+fi

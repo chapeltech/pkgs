@@ -14,10 +14,9 @@ The current package set is:
 
 Debian packages are published for Debian 13 (Trixie) on `amd64` and `arm64`.
 RPM packages are published for EL9 on `x86_64`. Alpine 3.24 packages are
-published for `x86_64` and `aarch64`. Package payloads remain in
-the projects' GitHub releases; the static site serves signed
-metadata and redirects package downloads to the corresponding versioned
-release asset with HTTP 302 responses.
+published for `x86_64` and `aarch64`. Debian and RPM package payloads remain
+in the projects' GitHub releases. Alpine packages and their signed indexes are
+published together in repository snapshot releases in this repository.
 
 Publication requires every stable latest release to contain `amd64` and
 `arm64` Debian packages, signed `x86_64` RPM packages, and signed `x86_64`
@@ -45,8 +44,8 @@ The build requires `apk`, `apt-ftparchive`, `createrepo_c`, `curl`,
 
 ```sh
 scripts/fetch-releases artifacts
-scripts/build-repositories artifacts public
-scripts/validate-output public
+scripts/build-repositories artifacts public alpine-release
+scripts/validate-output public alpine-release
 ```
 
 `ARCHIVE_SIGNING_SUBKEY_FINGERPRINT` must identify the available OpenPGP
@@ -67,8 +66,13 @@ echo https://repo.chapeltech.uk/alpine/v3.24/main \
 apk update
 ```
 
-The generated `public` directory is committed to the `published` branch by
-GitHub Actions and served by Netlify.
+The generated `public` directory is committed to the `repository` branch by
+GitHub Actions. Netlify's `published` branch contains only permanent HTTP 302
+rules. Repository metadata and configuration redirect to the raw `repository`
+branch, Debian and RPM payloads redirect to their project releases, and Alpine
+requests redirect to the latest repository snapshot release. Package
+publication never changes the `published` branch and therefore does not cause
+a Netlify deployment.
 
 ## Tests
 
