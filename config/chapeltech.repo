@@ -1,7 +1,0 @@
-[chapeltech]
-name=ChapelTech packages for EL9
-baseurl=https://repo.chapeltech.uk/rpm/el9/$basearch
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://repo.chapeltech.uk/keys/chapeltech-archive-keyring.asc
