@@ -1,0 +1,264 @@
+Package: knc
+Version: 1.13-1
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 77
+Depends: libc6 (>= 2.34), libgssapi3t64-heimdal (>= 1.4.0+git20110226)
+Filename: pool/github/chapeltech/knc/releases/download/v1.13/knc_1.13-1_amd64.deb
+Size: 28568
+MD5sum: 5a265009d2762a905da2584c8fc0270f
+SHA1: a414ec241cee3848217b59e788ff605a96fd9b92
+SHA256: a1580e907bc31d4d34343dbb457909ba4a2997765959e5d7cf290edca2c64f16
+Section: unknown
+Priority: extra
+Homepage: https://github.com/ChapelTech/knc
+Description: Kerberised NetCat
+     The KNC protocol provides an 8-bit clean, mutually authenticated
+     Kerberised tunnel between two endpoints.
+     .
+     This package provides an executable which implements the KNC
+     protocol.  The client and server are the same executable.
+
+Package: knc-dbgsym
+Source: knc
+Version: 1.13-1
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 74
+Depends: knc (= 1.13-1)
+Filename: pool/github/chapeltech/knc/releases/download/v1.13/knc-dbgsym_1.13-1_amd64.deb
+Size: 43580
+MD5sum: dc3c3e183951bce6a990df9e2bfc2cb5
+SHA1: e90e66bd87a215be7789020e6fa452b4a3bbd834
+SHA256: a28f2fdd5463f411028fd735e5c9778dbe059c7d87e99b260bda1c9700f1d59a
+Section: debug
+Priority: optional
+Description: debug symbols for knc
+Build-Ids: 805b6459bffbace5bcb1db95b0a154e71eff7ef7
+
+Package: krb5keytab
+Version: 0.4-1
+Architecture: amd64
+Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
+Installed-Size: 49
+Depends: libkrb5admin-perl (>= 0.4.3-1), perl:any, libc6 (>= 2.34)
+Filename: pool/github/chapeltech/krb5_keytab/releases/download/v0.4/krb5keytab_0.4-1_amd64.deb
+Size: 13804
+MD5sum: bc2939e8e80696e04bd764dbc11e06ec
+SHA1: 0fa407e1c317447f305d7309d42c4efd28ec8951
+SHA256: a5d1eb05858f1a23eae65c150982847cfb5b5e3b5d2a72ba466638593745acd2
+Section: admin
+Priority: optional
+Homepage: https://github.com/ChapelTech/krb5_keytab
+Description: Kerberos keytab management helper
+ krb5keytab provides a privileged helper and Perl client for installing,
+ changing, listing, querying, testing, and generating Kerberos keytabs through
+ the krb5_admin framework.
+
+Package: krb5keytab-dbgsym
+Source: krb5keytab
+Version: 0.4-1
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
+Installed-Size: 26
+Depends: krb5keytab (= 0.4-1)
+Filename: pool/github/chapeltech/krb5_keytab/releases/download/v0.4/krb5keytab-dbgsym_0.4-1_amd64.deb
+Size: 7188
+MD5sum: 83554b4d81c2bc52ba931df396e39beb
+SHA1: cc1ce65149ba72f0bb8d36baa43d155a8ad1e8c7
+SHA256: c9723b1b0a4993f66b5b1a97994fba4c4d465994e30854c44170c71ae47ee32b
+Section: debug
+Priority: optional
+Description: debug symbols for krb5keytab
+Build-Ids: 5a4904deb9ee991a70b63ebae85ec9261fbbfdd2
+
+Package: libkharon-perl
+Source: libkharon
+Version: 0.8.4-2
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 205
+Depends: perl (>= 5.40.1-6), perlapi-5.40.1, libc6 (>= 2.4), libdbi-perl, liberror-perl, libjson-perl
+Filename: pool/github/chapeltech/kharon/releases/download/v0.8.4/libkharon-perl_0.8.4-2_amd64.deb
+Size: 49372
+MD5sum: 456330e36702dd1b5a2425a9734eb997
+SHA1: 7d8ea4419773c28bc84fc919fac788afe1325136
+SHA256: e419c50ee332f2b5cf504df96a7f32ac0b9ba523d5164c2428bcd545b282c02d
+Section: perl
+Priority: optional
+Homepage: https://github.com/ChapelTech/kharon
+Description: client/server application development framework for Perl
+ Kharon is a lightweight Perl RPC library with support for UNIX domain
+ sockets and forked programs. It provides object-oriented remote calls,
+ failover, structured data marshalling, and exception propagation.
+
+Package: libkharon-perl-dbgsym
+Source: libkharon
+Version: 0.8.4-2
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 74
+Depends: libkharon-perl (= 0.8.4-2)
+Filename: pool/github/chapeltech/kharon/releases/download/v0.8.4/libkharon-perl-dbgsym_0.8.4-2_amd64.deb
+Size: 60728
+MD5sum: e6d4e0dbbfe8033f6fb44b30a2bc985c
+SHA1: 18e782766c029630ee93fc957088ec02f60bdafd
+SHA256: c99be3a0ee75f803395d7eba8248f5a136c30ce3af7003020c6367d86318373d
+Section: debug
+Priority: optional
+Description: debug symbols for libkharon-perl
+Build-Ids: 77b90848800e610a5ad7a0d040c3a832e2c23b8d
+
+Package: libknc
+Source: knc
+Version: 1.13-1
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 57
+Depends: libc6 (>= 2.34), libgssapi3t64-heimdal (>= 1.4.0+git20110226)
+Filename: pool/github/chapeltech/knc/releases/download/v1.13/libknc_1.13-1_amd64.deb
+Size: 16988
+MD5sum: 0b4191b7827bb0b0c888f987ded1d38f
+SHA1: 8a54fb6cfb9b3882d1c802b1e0df56a4ad06c1dc
+SHA256: f727cefe3b9ad50890eb360aff6125ff4d000edd6950a77a106ac617cb36c4ce
+Section: unknown
+Priority: extra
+Homepage: https://github.com/ChapelTech/knc
+Description: Kerberised Netcat library
+     The KNC protocol provides an 8-bit clean, mutually authenticated
+     Kerberised tunnel between two endpoints.
+     .
+     This package contains a library which implements the KNC protocol.
+
+Package: libknc-dbgsym
+Source: knc
+Version: 1.13-1
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 60
+Depends: libknc (= 1.13-1)
+Filename: pool/github/chapeltech/knc/releases/download/v1.13/libknc-dbgsym_1.13-1_amd64.deb
+Size: 43480
+MD5sum: a8450a83bd8486d6b5294e80de9ba392
+SHA1: 72b10371ea43beca1ddaf1f18dfafc231a6d1730
+SHA256: 56c3c7526008c4f67588e90dbfba3216a014de678833b78ea3703a5660eb5162
+Section: debug
+Priority: optional
+Description: debug symbols for libknc
+Build-Ids: 66a2047e0fc65a7d133876dbe0b91696fe7df2a5
+
+Package: libknc-dev
+Source: knc
+Version: 1.13-1
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 76
+Depends: libknc (= 1.13-1), heimdal-dev
+Filename: pool/github/chapeltech/knc/releases/download/v1.13/libknc-dev_1.13-1_amd64.deb
+Size: 25780
+MD5sum: 0aab617b0ef8c0360181b52321d971a3
+SHA1: d0efeba7de21aa9e9d1628879e8c4042fda584f1
+SHA256: 69faf5d1c7c4855a7f6c081f78b22ebb232211be8ad4cf00e359899cc86ea0c5
+Section: unknown
+Priority: extra
+Homepage: https://github.com/ChapelTech/knc
+Description: Kerberised NetCat
+     The KNC protocol provides an 8-bit clean, mutually authenticated
+     Kerberised tunnel between two endpoints.
+     .
+     This is the development package, required for building programs
+     using libknc.
+
+Package: libkrb5admin-perl
+Version: 0.4.3-1
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 878
+Depends: perl (>= 5.40.1-6), perlapi-5.40.1, libc6 (>= 2.38), libkadm5srv8t64-heimdal (>= 1.6~git20120311), libkrb5-26t64-heimdal (>= 1.6~git20120311), heimdal-clients, libdbi-perl, libdbd-sqlite3-perl, knc, libkharon-perl (>= 0.8), prefork
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.4.3/libkrb5admin-perl_0.4.3-1_amd64.deb
+Size: 303344
+MD5sum: 9058ab6c9ef3c865d79172268782fd49
+SHA1: bd94671b1c0aeef90c157e836da6a66026fe3bae
+SHA256: 157fcb581b090a2e53078d8e424fffed29181df647e03a934e646c9097debf02
+Section: perl
+Priority: optional
+Homepage: http://oskt.secure-endpoints.com/krb5_admin
+Description: Kerberos administration framework
+ Kerberos administration framework
+
+Package: libkrb5admin-perl-kdc
+Source: libkrb5admin-perl
+Version: 0.4.3-1
+Architecture: amd64
+Maintainer: elric <elric@imrryr.org>
+Installed-Size: 13
+Depends: libkrb5admin-perl (= 0.4.3-1), adduser, heimdal-kdc, postfix
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.4.3/libkrb5admin-perl-kdc_0.4.3-1_amd64.deb
+Size: 3656
+MD5sum: 281d85954e1a5cd3089e6369bcafb656
+SHA1: 6842078d7133d73571b42e8c59cf64233209cfe4
+SHA256: c78ffa83c2b7a2845bdeb40a7ff84ec20a9b3786e4ce3ece8ee57dd37eb8e435
+Section: perl
+Priority: optional
+Homepage: http://oskt.secure-endpoints.com/krb5_admin
+Description: Kerberos administration framework code for only the kdc
+ Kerberos administration framework the parts that go on the kdc
+
+Package: lnetd
+Version: 0.3-2
+Architecture: amd64
+Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
+Installed-Size: 38
+Depends: libc6 (>= 2.34)
+Filename: pool/github/chapeltech/lnetd/releases/download/v0.3/lnetd_0.3-2_amd64.deb
+Size: 8400
+MD5sum: 220e9c0907ad69ba1bc3392cbc7532e7
+SHA1: 54374881bea944e1e6eb3ffb8e1f974c4486c876
+SHA256: 6a957b1ce470f9cedc38e06299f0ce3dab8d3bcb383dc5a6af6544a7e6e4f90c
+Section: net
+Priority: optional
+Homepage: https://github.com/ChapelTech/lnetd
+Description: lightweight inetd-style UNIX socket listener
+ lnetd listens on a UNIX domain socket and starts a child process for each
+ connection, in the same manner as inetd.
+
+Package: lnetd-dbgsym
+Source: lnetd
+Version: 0.3-2
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
+Installed-Size: 32
+Depends: lnetd (= 0.3-2)
+Filename: pool/github/chapeltech/lnetd/releases/download/v0.3/lnetd-dbgsym_0.3-2_amd64.deb
+Size: 13420
+MD5sum: ee55adcc92626b0a10070c6771d9e92b
+SHA1: a5d4f1f65b48b3923e260458a49aaa49e1b37af8
+SHA256: b50c175d113e2775893cb2db9836e9035a4db759e701384ed560196bbddc455a
+Section: debug
+Priority: optional
+Description: debug symbols for lnetd
+Build-Ids: 5dac990e1421d2f43b6825f575660af9488211dd
+
+Package: prefork
+Version: 0.4-1
+Architecture: amd64
+Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
+Installed-Size: 34
+Depends: libc6 (>= 2.34)
+Filename: pool/github/chapeltech/prefork/releases/download/v0.4/prefork_0.4-1_amd64.deb
+Size: 8228
+MD5sum: 0820e81e9e104f71a72a1e6cb6743f82
+SHA1: b8f3e7a4e7e0b3bdededfc54293289f32b4b34ba
+SHA256: b18e25338dd581ed023d130f0b1760b59a1b3a5d08a5b7be7b1c31afe1c0424f
+Section: utils
+Priority: optional
+Homepage: https://github.com/ChapelTech/prefork
+Description: preforking helper for inetd-style services
+ prefork runs an inetd-style wait service with a pool of preforked worker
+ processes.
+

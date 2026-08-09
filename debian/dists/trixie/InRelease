@@ -1,0 +1,51 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Architectures: amd64 arm64
+Codename: trixie
+Components: main
+Date: Sun, 09 Aug 2026 16:33:04 +0000
+Description: ChapelTech packages for Debian 13
+Label: ChapelTech
+Origin: ChapelTech
+Suite: trixie
+MD5Sum:
+ 8869a11459bf632cbcb7bedb8a3de93c              197 Release
+ 341f68f98b2cf6ee03c633a3937a03be             9740 main/binary-amd64/Packages
+ 6f11073522bc70f410475689de7c981e             3167 main/binary-amd64/Packages.gz
+ 63c753710eaba1f487488e4463fd833a             9743 main/binary-arm64/Packages
+ 842c85ec135609bf04097223cd19a41f             3165 main/binary-arm64/Packages.gz
+SHA1:
+ de0d9b62f621fa8ec4609444aa3884aa1163628a              197 Release
+ 5c4a46b47a162c05adf51f32cf6ed33b77d601f9             9740 main/binary-amd64/Packages
+ 6544f60291008ae85ebf81c3ca5f7a0bbe55e3e3             3167 main/binary-amd64/Packages.gz
+ 2189c1926dd39d494770b48ff5f1855893ea47d8             9743 main/binary-arm64/Packages
+ 8a98eaca51f92a9ae79dc9d93c3090da00855a70             3165 main/binary-arm64/Packages.gz
+SHA256:
+ 0ea841c573b53016a73e31d615fc2bc71b308c983a8ac67f03dce4d49d20842d              197 Release
+ 6e2bb21ac49e3782f50f4ad2d44a87dd31173109717f7860f45bcdb859f7e861             9740 main/binary-amd64/Packages
+ e676b850503e560c5e16f82bdeb6376f60ee74869b0837ef7116ae5ad9bb8901             3167 main/binary-amd64/Packages.gz
+ f465c847741abca882ead63792cb47b519316995f04a18e2da0d459c0109ac40             9743 main/binary-arm64/Packages
+ 31362bd869ee652f32e085729e90c42c36d201f86f268b3a27942a9c77842b07             3165 main/binary-arm64/Packages.gz
+SHA512:
+ a64797e764538288902ccc459d6620ae21941131a2d85247bc71af2e971a85928834b6d6feeb03bd9677b313184fd9c5a57304a550ef6929faacd54a956b81d7              197 Release
+ 8049eda68baaf2ba7ecda1a0704641c97a5906c8fdb5d2f02d208fd3febd7a5ffc4b4e60bb0847e7ab9d4c2f541d269f0ff7fb60a60af46fd9a73a93c933e3b2             9740 main/binary-amd64/Packages
+ ec2b1d9dcbf3a76fe507842ae3c889af161ed96f879232850eb5e3ea8de67e25502bce13f05201ef58f88955bba9d6c77eafb74dc971c0494b86f9e398f316d7             3167 main/binary-amd64/Packages.gz
+ 150baab0879ec2646ad29ea11402ee2a0e0d7cb46d4a56822523e2b74e79b60b1fbb99c7e233b63b4c78fcc6f1aec8ccfabaaebedc0dea3ee054888424c1f1e5             9743 main/binary-arm64/Packages
+ db3b071a516b2613ac631e8335102810515e2ea54b98e45d01107692cf6a69b0bb803219d8d022bc6797705fa9b71f1ae40db2133955db2b334049c3713b9678             3165 main/binary-arm64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEESill8UvIr90OFgVDB67lDvVOLfIFAmp4q8AACgkQB67lDvVO
+LfLqkw/+Ic9sz/OTgRutd1BXz0deZz9Pxpjf7KJQLMc9BPQrz+ozwo1wXbEeCPeI
+CBnhwXqcM1OhDo/tia4Signh4eNHL1t522t9EcWnLZihbyu3rvFhF20pAhjZ1RF9
+9kepy6f8k6uymgOgg9z/87ovWWFgraYPr3S2aeX5pFlkydoGldzzXjEGKTlNpXEI
+ZLd1rWPrsliEpT9IKMsHI8Ikxj2JnAtsf0LXyzHEolOQOxkegXdUynVjXWDISp9I
+VBuxW5OLen+LU7qY6sXjqpRsR3NtZd1CKnJTRsSuebOHdfdHVR0BnFcu5AgaZrap
+QWjPBtWgc8rfsKGcwScYy8CzbS2Rna1LyawytTutj34snj/i4mK6joYT+yrkiYQX
+uJfPUDKOvUq7TzEh8PwX/PX03rtfEBNnpvhiSTXtWGVGzp2Uryi9O7iENWBrfm6n
+xabhFdoS1llEX0qbBvVjPUg+emx56M8H1YLG/cNVzP/qPCcdrXWYgzoqfL5ULPX6
+YDmR3BjfTCsuFyiIRaIutzCZtH+pu6c4+U+7LrU9S3i0hyYLor2P+/cYoNQIlyik
+CqcygDqv+mPDnc+AjaKefxLyJ+h7H85o8sOmgU9wFyEI8sPNNgI9EESLbbfpw8s/
+XDQB+Q5NF+xZvYY62pUOSLZhtRoOx7e0K7VJ2AVAdXCFnAwiwm8=
+=YHSk
+-----END PGP SIGNATURE-----
