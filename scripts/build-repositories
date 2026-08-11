@@ -167,12 +167,16 @@ for repository in $(jq -r '.repositories[]' "$manifest"); do
 		echo "missing signed EL9 packages for $repository" >&2
 		exit 1
 	}
-	for arch in x86_64 aarch64; do
-		test -f "$work/seen/$repository-apk-$arch" || {
-			echo "missing $arch Alpine packages for $repository" >&2
-			exit 1
-		}
-	done
+	if jq -e --arg repository "$repository" \
+	    '.alpine_repositories | index($repository) != null' \
+	    "$manifest" >/dev/null; then
+		for arch in x86_64 aarch64; do
+			test -f "$work/seen/$repository-apk-$arch" || {
+				echo "missing $arch Alpine packages for $repository" >&2
+				exit 1
+			}
+		done
+	fi
 done
 
 (

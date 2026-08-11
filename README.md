@@ -19,9 +19,10 @@ in the projects' GitHub releases. Alpine packages and their signed indexes are
 published together in repository snapshot releases in this repository.
 
 Publication requires every stable latest release to contain `amd64` and
-`arm64` Debian packages, signed `x86_64` RPM packages, and signed `x86_64`
-and `aarch64` Alpine packages. The fetch step fails closed while any of those
-release prerequisites are unavailable.
+`arm64` Debian packages and signed `x86_64` RPM packages. Projects listed in
+`alpine_repositories` must also publish signed `x86_64` and `aarch64` Alpine
+packages. The fetch step fails closed while any required release artifacts are
+unavailable.
 
 This repository also owns the reusable package-release workflow used by each
 project. It provides both selected-release source and current packaging to the

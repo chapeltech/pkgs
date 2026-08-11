@@ -107,16 +107,20 @@ EOF
 	printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$rpm_name" "$url" \
 			>>"$artifacts/releases.tsv"
 
-	apk_source=$(find /alpine-fixtures -type f \
-		-name "$package-1.0-r0.apk" -print -quit)
-	test -n "$apk_source"
-	for arch in x86_64 aarch64; do
-		apk_name=$package-1.0-r0.$arch.apk
-		cp "$apk_source" "$artifacts/$repository/$tag/$apk_name"
-		url=https://github.com/chapeltech/$repository/releases/download/$tag/$apk_name
-		printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$apk_name" "$url" \
-			>>"$artifacts/releases.tsv"
-	done
+	if jq -e --arg repository "$repository" \
+	    '.alpine_repositories | index($repository) != null' \
+	    packages.json >/dev/null; then
+		apk_source=$(find /alpine-fixtures -type f \
+			-name "$package-1.0-r0.apk" -print -quit)
+		test -n "$apk_source"
+		for arch in x86_64 aarch64; do
+			apk_name=$package-1.0-r0.$arch.apk
+			cp "$apk_source" "$artifacts/$repository/$tag/$apk_name"
+			url=https://github.com/chapeltech/$repository/releases/download/$tag/$apk_name
+			printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$apk_name" "$url" \
+				>>"$artifacts/releases.tsv"
+		done
+	fi
 done
 
 gpg --batch --pinentry-mode loopback --passphrase "$passphrase" \

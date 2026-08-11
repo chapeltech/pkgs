@@ -7,5 +7,12 @@
     "kharon",
     "krb5_admin",
     "krb5_keytab"
+  ],
+  "alpine_repositories": [
+    "prefork",
+    "lnetd",
+    "knc",
+    "kharon",
+    "krb5_keytab"
   ]
 }
