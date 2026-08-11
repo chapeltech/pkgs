@@ -12,9 +12,14 @@ on:
         description: Commit containing the packaging scripts to run
         required: true
         type: string
+      build_alpine:
+        description: Build Alpine packages
+        required: false
+        default: true
+        type: boolean
     secrets:
       ALPINE_SIGNING_KEY:
-        required: true
+        required: false
       ARCHIVE_SIGNING_KEY:
         required: true
       ARCHIVE_SIGNING_PASSPHRASE:
@@ -220,6 +225,7 @@ jobs:
   alpine:
     name: Alpine 3.24 (${{ matrix.architecture }})
     needs: release
+    if: ${{ inputs.build_alpine }}
     strategy:
       fail-fast: false
       matrix:
@@ -300,6 +306,12 @@ jobs:
   publish:
     name: Publish release assets
     needs: [debian, rpm, alpine]
+    if: >-
+      ${{ always() &&
+          needs.debian.result == 'success' &&
+          needs.rpm.result == 'success' &&
+          (needs.alpine.result == 'success' ||
+           needs.alpine.result == 'skipped') }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write
