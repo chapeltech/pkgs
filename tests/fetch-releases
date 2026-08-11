@@ -69,8 +69,8 @@ cat >"$release_dir/$repository.json" <<EOF
   "prerelease": false,
   "assets": [
     {
-      "name": "${repository}_1.0-1_amd64.deb",
-      "browser_download_url": "https://github.com/chapeltech/$repository/releases/download/v-test/${repository}_1.0-1_amd64.deb"
+      "name": "${repository}_1.0+private-1_amd64.deb",
+      "browser_download_url": "https://github.com/chapeltech/$repository/releases/download/v-test/${repository}_1.0%2Bprivate-1_amd64.deb"
     },
     {
       "name": "${repository}_1.0-1_arm64.deb",

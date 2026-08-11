@@ -33,6 +33,7 @@ jq -r '.repositories[]' "$manifest" | while IFS= read -r repository; do
 		exit 1
 	fi
 	mkdir -p "$dest/$repository/$tag"
+	encoded_tag=$(jq -nr --arg value "$tag" '$value | @uri')
 
 	jq -r '.assets[] | select(.name | test("\\.(apk|deb|rpm)$")) |
 	    [.name, .browser_download_url] | @tsv' "$release" |
@@ -46,7 +47,8 @@ jq -r '.repositories[]' "$manifest" | while IFS= read -r repository; do
 			exit 1
 			;;
 		esac
-		expected=https://github.com/$organization/$repository/releases/download/$tag/$name
+		encoded_name=$(jq -nr --arg value "$name" '$value | @uri')
+		expected=https://github.com/$organization/$repository/releases/download/$encoded_tag/$encoded_name
 		if [ "$url" != "$expected" ]; then
 			echo "unexpected release asset URL for $name: $url" >&2
 			exit 1
