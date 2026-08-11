@@ -76,7 +76,9 @@ while IFS='	' read -r repository tag name url extra; do
 		echo "release manifest contains unconfigured repository: $repository" >&2
 		exit 1
 	fi
-	expected=https://github.com/$organization/$repository/releases/download/$tag/$name
+	encoded_tag=$(jq -nr --arg value "$tag" '$value | @uri')
+	encoded_name=$(jq -nr --arg value "$name" '$value | @uri')
+	expected=https://github.com/$organization/$repository/releases/download/$encoded_tag/$encoded_name
 	if [ "$url" != "$expected" ]; then
 		echo "release manifest contains unexpected asset URL: $url" >&2
 		exit 1
