@@ -1,3 +1,81 @@
+Package: asgard-heimdal-clients
+Source: asgard-heimdal
+Version: 7.99.1+20260810.e0ee5cada
+Architecture: amd64
+Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
+Installed-Size: 1427
+Depends: asgard-heimdal-libs (= 7.99.1+20260810.e0ee5cada), libc6 (>= 2.38), libcom-err2 (>= 1.43.9), libedit2 (>= 2.11-20080614-0), libssl3t64 (>= 3.0.0)
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-clients_7.99.1+20260810.e0ee5cada_amd64.deb
+Size: 302740
+MD5sum: 2de9d54ebe061f3ed437afa0ddb00aca
+SHA1: 44203ebaa9c78d1d3f35139b06abc8302dfc07b1
+SHA256: 59fd8f57206f0bc0c6872a7768aa40f5ff7a22ef58e2e43cc11f3a34261f2910
+Section: net
+Priority: optional
+Homepage: https://heimdal.software/heimdal/
+Description: private Heimdal client tools for Asgard
+ This package contains Heimdal Kerberos client and utility programs in the
+ private Asgard program directory.  Only the kx509 client is exposed on the
+ system command path.
+
+Package: asgard-heimdal-devel
+Source: asgard-heimdal
+Version: 7.99.1+20260810.e0ee5cada
+Architecture: amd64
+Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
+Installed-Size: 1960
+Depends: asgard-heimdal-libs (= 7.99.1+20260810.e0ee5cada), comerr-dev, libcrypt-dev, libdb-dev, libedit-dev, libsqlite3-dev, libssl-dev
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-devel_7.99.1+20260810.e0ee5cada_amd64.deb
+Size: 172608
+MD5sum: d21a71914ce8757f70667ef6053d5d30
+SHA1: ba43e5988bb603ddb975b34de81d13d1438cd6e6
+SHA256: 53b6f9e366bed017764bd6195c89df283b1a4842e93c417051d813f608e4c25a
+Section: libdevel
+Priority: optional
+Homepage: https://heimdal.software/heimdal/
+Description: private Heimdal development files for Asgard
+ This package contains headers, linker names, and pkg-config metadata for
+ building against the private Asgard Heimdal.
+
+Package: asgard-heimdal-kdc
+Source: asgard-heimdal
+Version: 7.99.1+20260810.e0ee5cada
+Architecture: amd64
+Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
+Installed-Size: 518
+Depends: asgard-heimdal-libs (= 7.99.1+20260810.e0ee5cada), libc6 (>= 2.38), libcap-ng0 (>= 0.7.9), libssl3t64 (>= 3.0.0)
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-kdc_7.99.1+20260810.e0ee5cada_amd64.deb
+Size: 141056
+MD5sum: 555b1440665d4d06a249eba06ecab753
+SHA1: 67d374831696757977f78df10523a564a3012747
+SHA256: b9d95768b32979c4db2b58c51d8cfdd533d24a32323b201c868ef6fdb53932f0
+Section: net
+Priority: optional
+Homepage: https://heimdal.software/heimdal/
+Description: private Heimdal KDC programs for Asgard
+ This package contains the Heimdal KDC, administration daemons, and helper
+ programs in the private Asgard program directories.
+
+Package: asgard-heimdal-libs
+Source: asgard-heimdal
+Version: 7.99.1+20260810.e0ee5cada
+Architecture: amd64
+Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
+Installed-Size: 4257
+Depends: libc6 (>= 2.38), libcom-err2 (>= 1.43.9), libdb5.3t64, libedit2 (>= 2.11-20080614-0), libsqlite3-0 (>= 3.7.15), libssl3t64 (>= 3.4.0)
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-libs_7.99.1+20260810.e0ee5cada_amd64.deb
+Size: 1051508
+MD5sum: 7e2b51740f10af798feeaa7b23fd7ed7
+SHA1: 61df40e4e788b69cfc00adbe20e109a361f51435
+SHA256: 7a813a7b68e4195c992a7107d55edc4fca7c3e419a44e988ae11e53b62649f0f
+Section: net
+Priority: optional
+Homepage: https://heimdal.software/heimdal/
+Description: private Heimdal runtime libraries for Asgard
+ This package contains the Heimdal Kerberos runtime libraries used by
+ Asgard.  They are installed in a private multiarch directory so they can
+ coexist with the system Kerberos implementation.
+
 Package: knc
 Version: 1.13-1
 Architecture: amd64
@@ -174,16 +252,16 @@ Description: Kerberised NetCat
      using libknc.
 
 Package: libkrb5admin-perl
-Version: 0.4.3-1
+Version: 0.5-1
 Architecture: amd64
 Maintainer: elric <elric@imrryr.org>
-Installed-Size: 878
-Depends: perl (>= 5.40.1-6), perlapi-5.40.1, libc6 (>= 2.38), libkadm5srv8t64-heimdal (>= 1.6~git20120311), libkrb5-26t64-heimdal (>= 1.6~git20120311), heimdal-clients, libdbi-perl, libdbd-sqlite3-perl, knc, libkharon-perl (>= 0.8), prefork
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.4.3/libkrb5admin-perl_0.4.3-1_amd64.deb
-Size: 303344
-MD5sum: 9058ab6c9ef3c865d79172268782fd49
-SHA1: bd94671b1c0aeef90c157e836da6a66026fe3bae
-SHA256: 157fcb581b090a2e53078d8e424fffed29181df647e03a934e646c9097debf02
+Installed-Size: 828
+Depends: perl (>= 5.40.1-6), perlapi-5.40.1, asgard-heimdal-libs (>= 7.99.1+20260810.e0ee5cada), libc6 (>= 2.38), perl-modules, asgard-heimdal-clients, libdbi-perl, libdbd-sqlite3-perl, knc, libkharon-perl (>= 0.8)
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/libkrb5admin-perl_0.5-1_amd64.deb
+Size: 294288
+MD5sum: 1cabc66aaff6193cf25cac0fbbd4e132
+SHA1: 07b003369e735d4f8ca104bb3bbb22dd2c578b45
+SHA256: fdeee990ace5ea2097568ded473fff070e89a928fe19b7698ebf62b81938feee
 Section: perl
 Priority: optional
 Homepage: http://oskt.secure-endpoints.com/krb5_admin
@@ -192,16 +270,18 @@ Description: Kerberos administration framework
 
 Package: libkrb5admin-perl-kdc
 Source: libkrb5admin-perl
-Version: 0.4.3-1
+Version: 0.5-1
 Architecture: amd64
 Maintainer: elric <elric@imrryr.org>
-Installed-Size: 13
-Depends: libkrb5admin-perl (= 0.4.3-1), adduser, heimdal-kdc, postfix
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.4.3/libkrb5admin-perl-kdc_0.4.3-1_amd64.deb
-Size: 3656
-MD5sum: 281d85954e1a5cd3089e6369bcafb656
-SHA1: 6842078d7133d73571b42e8c59cf64233209cfe4
-SHA256: c78ffa83c2b7a2845bdeb40a7ff84ec20a9b3786e4ce3ece8ee57dd37eb8e435
+Installed-Size: 25
+Depends: perl:any, libkrb5admin-perl (= 0.5-1), asgard-heimdal-kdc, perl-modules, libdbi-perl, libdbd-sqlite3-perl, knc, libkharon-perl, prefork
+Breaks: libkrb5admin-perl (<< 0.5~)
+Replaces: libkrb5admin-perl (<< 0.5~)
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/libkrb5admin-perl-kdc_0.5-1_amd64.deb
+Size: 6612
+MD5sum: 1d77fc579720a506c741bb2da10be105
+SHA1: e5548fb49423ecbf5e51e47855eff0bde70f74af
+SHA256: 999bd138288dc6c20c172664c0a13676dce5ffadc22b14983cee00f43f50596b
 Section: perl
 Priority: optional
 Homepage: http://oskt.secure-endpoints.com/krb5_admin
