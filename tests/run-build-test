@@ -68,6 +68,24 @@ EOF
 			>>"$artifacts/releases.tsv"
 	done
 
+	root=$work/deb-$package-all
+	mkdir -p "$root/DEBIAN" "$root/usr/share/$package"
+	cat >"$root/DEBIAN/control" <<EOF
+Package: $package-common
+Version: 1.0+private-1
+Architecture: all
+Maintainer: ChapelTech <repo@chapeltech.uk>
+Description: synthetic architecture-independent $repository test package
+EOF
+	touch "$root/usr/share/$package/repository-test-common"
+	deb_name=${package}-common_1.0+private-1_all.deb
+	dpkg-deb --build --root-owner-group "$root" \
+		"$artifacts/$repository/$tag/$deb_name" >/dev/null
+	encoded_name=$(jq -nr --arg value "$deb_name" '$value | @uri')
+	url=https://github.com/chapeltech/$repository/releases/download/$tag/$encoded_name
+	printf '%s\t%s\t%s\t%s\n' "$repository" "$tag" "$deb_name" "$url" \
+		>>"$artifacts/releases.tsv"
+
 	cat >"$rpmtop/SPECS/$package.spec" <<EOF
 Name: $package
 Version: 1.0

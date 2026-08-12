@@ -90,13 +90,17 @@ while IFS='	' read -r repository tag name url extra; do
 		arch=$(dpkg-deb -f "$source" Architecture)
 		case "$arch" in
 		amd64|arm64)
+			touch "$work/seen/$repository-deb-$arch"
+			;;
+		all)
+			touch "$work/seen/$repository-deb-amd64"
+			touch "$work/seen/$repository-deb-arm64"
 			;;
 		*)
 			echo "ignoring unsupported Debian architecture: $name ($arch)" >&2
 			continue
 			;;
 		esac
-		touch "$work/seen/$repository-deb-$arch"
 		destination=$output/debian/pool/github/$organization/$repository/releases/download/$tag/$name
 		;;
 	*.rpm)

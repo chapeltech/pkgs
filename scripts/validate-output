@@ -45,7 +45,9 @@ for arch in amd64 arm64; do
 	test -s "$packages.gz"
 	gzip -cd "$packages.gz" | cmp - "$packages"
 	grep -q "^Architecture: $arch$" "$packages"
-	if grep '^Architecture:' "$packages" | grep -qvx "Architecture: $arch"; then
+	grep -q '^Architecture: all$' "$packages"
+	if grep '^Architecture:' "$packages" |
+	    grep -Evx "Architecture: ($arch|all)" | grep -q .; then
 		echo "unexpected architecture in $packages" >&2
 		exit 1
 	fi
