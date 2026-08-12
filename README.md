@@ -13,10 +13,11 @@ The current package set is:
 * krb5_keytab
 
 Debian packages are published for Debian 13 (Trixie) on `amd64` and `arm64`.
-RPM packages are published for EL9 on `x86_64`. Alpine 3.24 packages are
-published for `x86_64` and `aarch64`. Debian and RPM package payloads remain
-in the projects' GitHub releases. Alpine packages and their signed indexes are
-published together in repository snapshot releases in this repository.
+RPM packages are built against Rocky Linux 9.6 and published for EL 9.6 and
+later on `x86_64`. Alpine 3.24 packages are published for `x86_64` and
+`aarch64`. Debian and RPM package payloads remain in the projects' GitHub
+releases. Alpine packages and their signed indexes are published together in
+repository snapshot releases in this repository.
 
 Publication requires every stable latest release to contain `amd64` and
 `arm64` Debian packages and signed `x86_64` RPM packages. Projects listed in
