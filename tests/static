@@ -40,6 +40,10 @@ grep -Fq \
 grep -Fq \
 	'baseurl=https://dl.rockylinux.org/vault/rocky/9.6/BaseOS/$basearch/os/' \
 	"$top/.github/workflows/release-packages.yml"
+grep -Fq 'Remove stale package assets' \
+	"$top/.github/workflows/release-packages.yml"
+grep -Fq 'gh release delete-asset "$RELEASE_TAG" "$asset"' \
+	"$top/.github/workflows/release-packages.yml"
 
 jq -e '
     .organization == "chapeltech" and
