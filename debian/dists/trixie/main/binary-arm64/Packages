@@ -319,10 +319,10 @@ Maintainer: elric <elric@imrryr.org>
 Installed-Size: 889
 Depends: perl (>= 5.40.1-6), perlapi-5.40.1, asgard-heimdal-libs (>= 7.99.1+20260812.a78154666), libc6 (>= 2.38), perl-modules, asgard-heimdal-clients, libdbi-perl, libdbd-sqlite3-perl, knc, libkharon-perl (>= 0.8)
 Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/libkrb5admin-perl_0.5-1_arm64.deb
-Size: 282876
-MD5sum: 9388b29bfa0cc671e9622dd342616200
-SHA1: 65a48be758e50f8fb1e530599fbaf50cacec2be6
-SHA256: e8ac98cb84a872c2f0f15a1006858ea5b727886df2a24158bfa4bdddc580baba
+Size: 282872
+MD5sum: d15f664959790afe006a8d6dc746891e
+SHA1: cf9a05194cad3f0ec910f16946ad275bf591d86b
+SHA256: 0918602227d20b0702d4abc9bcb34f56f46c1e08d8aa538f4b3ee45d33610b78
 Section: perl
 Priority: optional
 Homepage: http://oskt.secure-endpoints.com/krb5_admin
