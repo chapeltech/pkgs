@@ -39,6 +39,9 @@ grep -Fq \
 	"$top/.github/workflows/release-packages.yml"
 grep -Fq "printf '9.6\\n' >/etc/dnf/vars/releasever" \
 	"$top/.github/workflows/release-packages.yml"
+grep -Fq \
+	'baseurl=https://dl.rockylinux.org/vault/rocky/9.6/BaseOS/$basearch/os/' \
+	"$top/.github/workflows/release-packages.yml"
 
 jq -e '
     .organization == "chapeltech" and
