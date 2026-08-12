@@ -1,15 +1,15 @@
 Package: asgard-heimdal-clients
 Source: asgard-heimdal
-Version: 7.99.1+20260810.e0ee5cada
+Version: 7.99.1+20260812.a78154666
 Architecture: arm64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 2246
-Depends: asgard-heimdal-libs (= 7.99.1+20260810.e0ee5cada), libc6 (>= 2.38), libcom-err2 (>= 1.43.9), libedit2 (>= 2.11-20080614-0), libssl3t64 (>= 3.0.0)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-clients_7.99.1+20260810.e0ee5cada_arm64.deb
-Size: 292420
-MD5sum: 2ac1df73030ded085e4e86ceeb31d05f
-SHA1: f37e435e388bc946ac08ab6e18768ab642f4f13e
-SHA256: 217871442c90e904550788fdd09ec53f6ecf4c1350993106bf1875db967c801b
+Depends: asgard-heimdal-libs (= 7.99.1+20260812.a78154666), libc6 (>= 2.38), libcom-err2 (>= 1.43.9), libedit2 (>= 2.11-20080614-0), libssl3t64 (>= 3.0.0)
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-clients_7.99.1+20260812.a78154666_arm64.deb
+Size: 292868
+MD5sum: d4fb01ba5c39acf724778d7b4286ed41
+SHA1: 4e6321f847c3add2bd09471b5731b9be19afdcb1
+SHA256: 3d06c31d26532c385c91e001d6cc32ccce49a9cb4a6d9fc70c0b8f9e8263af0b
 Section: net
 Priority: optional
 Homepage: https://heimdal.software/heimdal/
@@ -20,16 +20,16 @@ Description: private Heimdal client tools for Asgard
 
 Package: asgard-heimdal-devel
 Source: asgard-heimdal
-Version: 7.99.1+20260810.e0ee5cada
+Version: 7.99.1+20260812.a78154666
 Architecture: arm64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 1960
-Depends: asgard-heimdal-libs (= 7.99.1+20260810.e0ee5cada), comerr-dev, libcrypt-dev, libdb-dev, libedit-dev, libsqlite3-dev, libssl-dev
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-devel_7.99.1+20260810.e0ee5cada_arm64.deb
-Size: 172612
-MD5sum: 1dc2da858a242d76590ebf5936cd2051
-SHA1: 95cb7089704eaa8becec61c858e8a6e4dad00ef1
-SHA256: b9f3c909f1c399ac708c1bf8964fb0db1ea303b07aa43cccf93ed7fe8e8de9f4
+Depends: asgard-heimdal-libs (= 7.99.1+20260812.a78154666), comerr-dev, libcrypt-dev, libdb-dev, libedit-dev, libsqlite3-dev, libssl-dev
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-devel_7.99.1+20260812.a78154666_arm64.deb
+Size: 172660
+MD5sum: 6a0c381187d1fa23669ff8b2ad4944f5
+SHA1: 994b3ae0ace508e77a8d453d0d65bc98a0f02913
+SHA256: fe929f2364dcd66577437dfa25dc66d3d687dbcb619ef36fe0bee4c37363c5a4
 Section: libdevel
 Priority: optional
 Homepage: https://heimdal.software/heimdal/
@@ -39,16 +39,16 @@ Description: private Heimdal development files for Asgard
 
 Package: asgard-heimdal-kdc
 Source: asgard-heimdal
-Version: 7.99.1+20260810.e0ee5cada
+Version: 7.99.1+20260812.a78154666
 Architecture: arm64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 925
-Depends: asgard-heimdal-libs (= 7.99.1+20260810.e0ee5cada), libc6 (>= 2.38), libcap-ng0 (>= 0.7.9), libssl3t64 (>= 3.0.0)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-kdc_7.99.1+20260810.e0ee5cada_arm64.deb
-Size: 132860
-MD5sum: 757e6b98b07123a5f8eba04f4ccf22b6
-SHA1: 7c4a21667eb64894125fe8ffea99a80431fa582f
-SHA256: b628bee76038bce3b29cf7366a4b7dcdd9c65f9e1f3b2faa72e2a2565e019ae3
+Depends: asgard-heimdal-libs (= 7.99.1+20260812.a78154666), libc6 (>= 2.38), libcap-ng0 (>= 0.7.9), libssl3t64 (>= 3.0.0)
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-kdc_7.99.1+20260812.a78154666_arm64.deb
+Size: 132824
+MD5sum: bdf2c53d8b8acc3df693d5cd61d80db1
+SHA1: cf232d1a2d7ce4405f07572fdb613fa54a981add
+SHA256: 1a6a7b5ab774560217ea62ef29d7a46e44c40091b36755d4f11b19cc0d15cef8
 Section: net
 Priority: optional
 Homepage: https://heimdal.software/heimdal/
@@ -58,16 +58,16 @@ Description: private Heimdal KDC programs for Asgard
 
 Package: asgard-heimdal-libs
 Source: asgard-heimdal
-Version: 7.99.1+20260810.e0ee5cada
+Version: 7.99.1+20260812.a78154666
 Architecture: arm64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 4765
 Depends: libc6 (>= 2.38), libcom-err2 (>= 1.43.9), libdb5.3t64, libedit2 (>= 2.11-20080614-0), libsqlite3-0 (>= 3.7.15), libssl3t64 (>= 3.4.0)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-libs_7.99.1+20260810.e0ee5cada_arm64.deb
-Size: 995648
-MD5sum: a36774831b911109302557df0330dc58
-SHA1: c6ec4f12c606a894fb0c0f249aa44d52170ce72c
-SHA256: cb426b88b8856f28d4729bb59fe2f17e3e857cd2d198ae702f8126ccc878066b
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-libs_7.99.1+20260812.a78154666_arm64.deb
+Size: 995392
+MD5sum: a89ab4eb3f0226530838ce26ab5ddde7
+SHA1: 84b87a62c0333e93d3f94c255106575852a6c5c5
+SHA256: 51692f62894f26e91603058d7e49f6f17e4f7973cbfb60c7934af39bbebf6e1e
 Section: net
 Priority: optional
 Homepage: https://heimdal.software/heimdal/
@@ -317,12 +317,12 @@ Version: 0.5-1
 Architecture: arm64
 Maintainer: elric <elric@imrryr.org>
 Installed-Size: 889
-Depends: perl (>= 5.40.1-6), perlapi-5.40.1, asgard-heimdal-libs (>= 7.99.1+20260810.e0ee5cada), libc6 (>= 2.38), perl-modules, asgard-heimdal-clients, libdbi-perl, libdbd-sqlite3-perl, knc, libkharon-perl (>= 0.8)
+Depends: perl (>= 5.40.1-6), perlapi-5.40.1, asgard-heimdal-libs (>= 7.99.1+20260812.a78154666), libc6 (>= 2.38), perl-modules, asgard-heimdal-clients, libdbi-perl, libdbd-sqlite3-perl, knc, libkharon-perl (>= 0.8)
 Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/libkrb5admin-perl_0.5-1_arm64.deb
 Size: 282876
-MD5sum: 9edee9d7fbd59b4e4fb333e592f9a3d0
-SHA1: a9f9bf8901c773504240f3d518ab11cc1cb7102b
-SHA256: b89d461947a3cfc9acd5f4cf67cdbf626da003ce4af6b27068015b522d0682b5
+MD5sum: 9388b29bfa0cc671e9622dd342616200
+SHA1: 65a48be758e50f8fb1e530599fbaf50cacec2be6
+SHA256: e8ac98cb84a872c2f0f15a1006858ea5b727886df2a24158bfa4bdddc580baba
 Section: perl
 Priority: optional
 Homepage: http://oskt.secure-endpoints.com/krb5_admin

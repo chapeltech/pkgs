@@ -1,5 +1,5 @@
 [chapeltech]
-name=ChapelTech packages for EL9
+name=ChapelTech packages for EL 9.6 and later
 baseurl=https://repo.chapeltech.uk/rpm/el9/$basearch
 enabled=1
 gpgcheck=1
