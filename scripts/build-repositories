@@ -210,7 +210,9 @@ done
 	    --output dists/trixie/InRelease dists/trixie/Release
 )
 
-createrepo_c --quiet --general-compress-type=gz "$output/rpm/el9/x86_64"
+createrepo_c --quiet --general-compress-type=gz \
+	--baseurl=https://repo.chapeltech.uk/rpm/el9/x86_64 \
+	"$output/rpm/el9/x86_64"
 gpg --batch --yes --pinentry-mode loopback \
 	--passphrase-file "$work/passphrase" --local-user "$fingerprint!" \
 	--armor --detach-sign \

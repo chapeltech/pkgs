@@ -143,9 +143,15 @@ if grep -q 'legacy-' "$work/primary.xml"; then
 	echo "unsigned legacy RPM found in repository metadata" >&2
 	exit 1
 fi
-grep -q "<location href=\"Packages/github/$organization/" \
+rpm_base=https://repo.chapeltech.uk/rpm/el9/x86_64
+grep -q "<location xml:base=\"$rpm_base\" href=\"Packages/github/$organization/" \
 	"$work/primary.xml"
-sed -n 's/.*<location href="\([^"]*\)".*/\1/p' "$work/primary.xml" |
+if grep '<location ' "$work/primary.xml" |
+    grep -Fv "xml:base=\"$rpm_base\"" | grep -q .; then
+	echo "RPM payload without canonical base URL" >&2
+	exit 1
+fi
+sed -n 's/.*<location .* href="\([^"]*\)".*/\1/p' "$work/primary.xml" |
 while IFS= read -r location; do
 	case "$location" in
 	Packages/github/$organization/*/releases/download/*/*.rpm)
@@ -171,7 +177,7 @@ while IFS= read -r location; do
 done
 
 for repository in $(jq -r '.repositories[]' "$manifest"); do
-	grep -q "<location href=\"Packages/github/$organization/$repository/releases/download/" \
+	grep -q "href=\"Packages/github/$organization/$repository/releases/download/" \
 	    "$work/primary.xml"
 done
 
