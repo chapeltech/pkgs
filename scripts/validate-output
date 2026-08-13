@@ -143,7 +143,7 @@ if grep -q 'legacy-' "$work/primary.xml"; then
 	echo "unsigned legacy RPM found in repository metadata" >&2
 	exit 1
 fi
-rpm_base=https://repo.chapeltech.uk/rpm/el9/x86_64
+rpm_base=https://repo.chapeltech.uk/rpm/el9/x86_64/
 grep -q "<location xml:base=\"$rpm_base\" href=\"Packages/github/$organization/" \
 	"$work/primary.xml"
 if grep '<location ' "$work/primary.xml" |
