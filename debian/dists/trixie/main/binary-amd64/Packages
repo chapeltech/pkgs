@@ -5,7 +5,7 @@ Architecture: amd64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 1427
 Depends: asgard-heimdal-libs (= 7.99.1+20260812.a78154666), libc6 (>= 2.38), libcom-err2 (>= 1.43.9), libedit2 (>= 2.11-20080614-0), libssl3t64 (>= 3.0.0)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-clients_7.99.1+20260812.a78154666_amd64.deb
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5.1/asgard-heimdal-clients_7.99.1+20260812.a78154666_amd64.deb
 Size: 302244
 MD5sum: 1d14c09bbceb4a4433b6e29dfae8ba6b
 SHA1: f92ff1d9bacec568a7b3920e588895e78a9a9cbe
@@ -25,7 +25,7 @@ Architecture: amd64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 1960
 Depends: asgard-heimdal-libs (= 7.99.1+20260812.a78154666), comerr-dev, libcrypt-dev, libdb-dev, libedit-dev, libsqlite3-dev, libssl-dev
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-devel_7.99.1+20260812.a78154666_amd64.deb
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5.1/asgard-heimdal-devel_7.99.1+20260812.a78154666_amd64.deb
 Size: 172656
 MD5sum: 76942b68ec92e7ba10961025daf219f2
 SHA1: 23f0ba2969d4010222c2287defeb21391e7adea6
@@ -44,7 +44,7 @@ Architecture: amd64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 518
 Depends: asgard-heimdal-libs (= 7.99.1+20260812.a78154666), libc6 (>= 2.38), libcap-ng0 (>= 0.7.9), libssl3t64 (>= 3.0.0)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-kdc_7.99.1+20260812.a78154666_amd64.deb
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5.1/asgard-heimdal-kdc_7.99.1+20260812.a78154666_amd64.deb
 Size: 141408
 MD5sum: 0b9d978b268dc3f824a25f64bea43339
 SHA1: 597e0335d4b67d03aa873d6c32695dec913a7ebf
@@ -63,7 +63,7 @@ Architecture: amd64
 Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
 Installed-Size: 4257
 Depends: libc6 (>= 2.38), libcom-err2 (>= 1.43.9), libdb5.3t64, libedit2 (>= 2.11-20080614-0), libsqlite3-0 (>= 3.7.15), libssl3t64 (>= 3.4.0)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/asgard-heimdal-libs_7.99.1+20260812.a78154666_amd64.deb
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5.1/asgard-heimdal-libs_7.99.1+20260812.a78154666_amd64.deb
 Size: 1051400
 MD5sum: 3e534ca138997405e427005cea57a288
 SHA1: 45f2e4355079e767b26686ddfef245bb81fe2725
@@ -117,18 +117,18 @@ Build-Ids: 805b6459bffbace5bcb1db95b0a154e71eff7ef7
 
 Package: krb5-hostd
 Source: libkrb5admin-perl
-Version: 0.5-1
+Version: 0.5.1-1
 Architecture: all
 Maintainer: elric <elric@imrryr.org>
-Installed-Size: 35
-Depends: libkrb5admin-perl (= 0.5-1), krb5-prestash-refresh (= 0.5-1), knc, prefork
+Installed-Size: 36
+Depends: libkrb5admin-perl (= 0.5.1-1), krb5-prestash-refresh (= 0.5.1-1), knc, prefork
 Breaks: libkrb5admin-perl (<< 0.5~)
 Replaces: libkrb5admin-perl (<< 0.5~)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/krb5-hostd_0.5-1_all.deb
-Size: 7070
-MD5sum: 7b369e988e53c0f4fcf1ab9f39481db7
-SHA1: c7ac2cf869748eec5ecd5e37a676f8fa49abcb96
-SHA256: 9497eaf96f3ec2c8c3432e9dacc7f16ba1e4d2c23bac41c43cc67168d06f7125
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5.1/krb5-hostd_0.5.1-1_all.deb
+Size: 7344
+MD5sum: 63d587a2715a1d86be7a27615c3b583f
+SHA1: 458f81211bc6e25c64a4739cfabe1d3d918cc870
+SHA256: 9d01155b2f34c5e7469c49cf3ceca3adb02d1d203d24d6ca95f98c327bc15776
 Section: perl
 Priority: optional
 Homepage: http://oskt.secure-endpoints.com/krb5_admin
@@ -137,18 +137,18 @@ Description: Kerberos host administration daemon
 
 Package: krb5-prestash
 Source: libkrb5admin-perl
-Version: 0.5-1
+Version: 0.5.1-1
 Architecture: all
 Maintainer: elric <elric@imrryr.org>
 Installed-Size: 24
-Depends: libkrb5admin-perl (= 0.5-1)
+Depends: libkrb5admin-perl (= 0.5.1-1)
 Breaks: libkrb5admin-perl (<< 0.5~)
 Replaces: libkrb5admin-perl (<< 0.5~)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/krb5-prestash_0.5-1_all.deb
-Size: 6616
-MD5sum: 982c414e0ab54591bb82f80d35c1e93b
-SHA1: 3af6b36d390fe8c2ce79b8de8acc9799aeeeb263
-SHA256: f4330b6553aeed509f30c354ee13c29e917682c8862efb4e534a175fa61f495d
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5.1/krb5-prestash_0.5.1-1_all.deb
+Size: 6492
+MD5sum: 88ef03319a742c0321b3c503d268570e
+SHA1: 1d8b90a0bd09dc6869d85ce1639d3f11d58862a9
+SHA256: 7bc8e860ed862125cd2ee176daa0e60b20d49cd6a1a2f1d5e4867829fcfd6017
 Section: perl
 Priority: optional
 Homepage: http://oskt.secure-endpoints.com/krb5_admin
@@ -157,18 +157,18 @@ Description: Kerberos credential prestashing tool
 
 Package: krb5-prestash-refresh
 Source: libkrb5admin-perl
-Version: 0.5-1
+Version: 0.5.1-1
 Architecture: all
 Maintainer: elric <elric@imrryr.org>
 Installed-Size: 22
-Depends: krb5-prestash (= 0.5-1)
+Depends: krb5-prestash (= 0.5.1-1)
 Breaks: libkrb5admin-perl (<< 0.5~)
 Replaces: libkrb5admin-perl (<< 0.5~)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/krb5-prestash-refresh_0.5-1_all.deb
-Size: 4146
-MD5sum: 29a5f9287af847a606ad23f4080a135b
-SHA1: 58f43fb91bd0ed41f794d8d3cf7a140cebd71f5d
-SHA256: 320c0519040a09998f94f10f663d36d742b591791fb63d613db1588d1e7d4084
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5.1/krb5-prestash-refresh_0.5.1-1_all.deb
+Size: 4038
+MD5sum: f4244179f35a14a56277957431094087
+SHA1: 6fa425ebab783289e8b031456cd5a8786cb7f454
+SHA256: e38a8adb63309885ef53f28a73a2c446f0405c7a81974e9c30e8ebc6b27fe354
 Section: perl
 Priority: optional
 Homepage: http://oskt.secure-endpoints.com/krb5_admin
@@ -313,16 +313,16 @@ Description: Kerberised NetCat
      using libknc.
 
 Package: libkrb5admin-perl
-Version: 0.5-1
+Version: 0.5.1-1
 Architecture: amd64
 Maintainer: elric <elric@imrryr.org>
-Installed-Size: 828
+Installed-Size: 829
 Depends: perl (>= 5.40.1-6), perlapi-5.40.1, asgard-heimdal-libs (>= 7.99.1+20260812.a78154666), libc6 (>= 2.38), perl-modules, asgard-heimdal-clients, libdbi-perl, libdbd-sqlite3-perl, knc, libkharon-perl (>= 0.8)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/libkrb5admin-perl_0.5-1_amd64.deb
-Size: 294286
-MD5sum: fa76ebed28665163d6f216da40adb56c
-SHA1: 37fe4404074e92866b04d24b43aec93cb02eda82
-SHA256: 19e7b62c56f2365c846c20bc8ef252f8e50e91abe80b2496dc60cf498ace872d
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5.1/libkrb5admin-perl_0.5.1-1_amd64.deb
+Size: 294488
+MD5sum: ea5913b7c5975b621059c375a2c658a0
+SHA1: 5ae9eb3cc9782c126e53cab96df7c2237f9636ca
+SHA256: 07bdf743f9f66676a7e2e87d3e073d103dbf0651bd325c8f53953d5dfff7caa3
 Section: perl
 Priority: optional
 Homepage: http://oskt.secure-endpoints.com/krb5_admin
@@ -331,18 +331,18 @@ Description: Kerberos administration framework
 
 Package: libkrb5admin-perl-kdc
 Source: libkrb5admin-perl
-Version: 0.5-1
+Version: 0.5.1-1
 Architecture: amd64
 Maintainer: elric <elric@imrryr.org>
-Installed-Size: 25
-Depends: perl:any, libkrb5admin-perl (= 0.5-1), asgard-heimdal-kdc, perl-modules, libdbi-perl, libdbd-sqlite3-perl, knc, libkharon-perl, prefork
+Installed-Size: 26
+Depends: perl:any, libkrb5admin-perl (= 0.5.1-1), asgard-heimdal-kdc, perl-modules, libdbi-perl, libdbd-sqlite3-perl, knc, libkharon-perl, prefork
 Breaks: libkrb5admin-perl (<< 0.5~)
 Replaces: libkrb5admin-perl (<< 0.5~)
-Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5/libkrb5admin-perl-kdc_0.5-1_amd64.deb
-Size: 6612
-MD5sum: 1d77fc579720a506c741bb2da10be105
-SHA1: e5548fb49423ecbf5e51e47855eff0bde70f74af
-SHA256: 999bd138288dc6c20c172664c0a13676dce5ffadc22b14983cee00f43f50596b
+Filename: pool/github/chapeltech/krb5_admin/releases/download/v0.5.1/libkrb5admin-perl-kdc_0.5.1-1_amd64.deb
+Size: 6654
+MD5sum: 6b870486076994c8678fe1f23c81ebc6
+SHA1: 5a94b0e3beedc7b73c49d36d49cd310e96a67872
+SHA256: 558f1b3758af1e4be5040ba5081f060d0d3fc67870f6a495b72ffd46533ab55a
 Section: perl
 Priority: optional
 Homepage: http://oskt.secure-endpoints.com/krb5_admin
